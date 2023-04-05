@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<org.eventb.core.poFile org.eventb.core.poStamp="1">
-    <org.eventb.core.poPredicateSet name="ABSHYP" org.eventb.core.poStamp="1">
-        <org.eventb.core.poIdentifier name="BOOKING" org.eventb.core.type="ℙ(BOOKING)"/>
-        <org.eventb.core.poIdentifier name="USER" org.eventb.core.type="ℙ(USER)"/>
-        <org.eventb.core.poIdentifier name="PHARMACY" org.eventb.core.type="ℙ(PHARMACY)"/>
-    </org.eventb.core.poPredicateSet>
-    <org.eventb.core.poPredicateSet name="ALLHYP" org.eventb.core.parentSet="/COMP1216 CW2/UserContext.bpo|org.eventb.core.poFile#UserContext|org.eventb.core.poPredicateSet#ABSHYP" org.eventb.core.poStamp="1"/>
-</org.eventb.core.poFile>

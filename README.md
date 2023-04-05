@@ -1,2 +1,0 @@
-# COMP1216-CW2
- COMP1216 Coursework 2
