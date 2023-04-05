@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<org.eventb.core.scContextFile org.eventb.core.accurate="true" org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase"/>
+<org.eventb.core.scContextFile org.eventb.core.accurate="true" org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase">
+    <org.eventb.core.scCarrierSet name="BOOKING" org.eventb.core.source="/COMP1216 CW2/UserContext.buc|org.eventb.core.contextFile#UserContext|org.eventb.core.carrierSet#)" org.eventb.core.type="ℙ(BOOKING)"/>
+    <org.eventb.core.scCarrierSet name="USER" org.eventb.core.source="/COMP1216 CW2/UserContext.buc|org.eventb.core.contextFile#UserContext|org.eventb.core.carrierSet#'" org.eventb.core.type="ℙ(USER)"/>
+    <org.eventb.core.scCarrierSet name="PHARMACY" org.eventb.core.source="/COMP1216 CW2/UserContext.buc|org.eventb.core.contextFile#UserContext|org.eventb.core.carrierSet#(" org.eventb.core.type="ℙ(PHARMACY)"/>
+</org.eventb.core.scContextFile>

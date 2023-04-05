@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase" version="3"/>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase" version="3">
+    <org.eventb.core.carrierSet name="'" org.eventb.core.identifier="USER"/>
+    <org.eventb.core.carrierSet name="(" org.eventb.core.identifier="PHARMACY"/>
+    <org.eventb.core.carrierSet name=")" org.eventb.core.identifier="BOOKING"/>
+</org.eventb.core.contextFile>
