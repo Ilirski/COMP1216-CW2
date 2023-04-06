@@ -1,3 +1,6 @@
-machine User event INITIALISATION
-	end
+machine User sees UserContext
+
+event INITIALISATION
+
+end
 
