@@ -1,5 +1,0 @@
-context UserContext
-sets
-	USER
-	PHARMACY
-	BOOKING
