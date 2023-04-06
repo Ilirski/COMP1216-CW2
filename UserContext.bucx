@@ -1,6 +1,6 @@
 context UserContext
 sets
 	USER
-	PHARMACY123
-	BOOKING123
+	PHARMACY
+	BOOKING
 end
