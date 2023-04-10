@@ -1,6 +1,11 @@
 context UserContext
 sets
 	USER
-	PHARMACY
-	BOOKING
+	PASSWORD
+constants
+	root_user
+	root_password
+axioms
+	@ROOT_USER: root_user ∈ USER
+	@ROOT_PASSWORD: root_password ∈ PASSWORD
 end

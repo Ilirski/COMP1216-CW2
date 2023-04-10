@@ -1,6 +1,87 @@
-machine User sees UserContext
-
+machine User 
+sees UserContext
+variables
+	users
+	login
+	register
+	
+	admins
+	staff
+	clients
+invariants
+	/* Users can have the same passwords. A many to one relationship*/
+	/* 2 ways of modelling: Tokens and Partitions */
+	@inv-user-password: users ∈ USER ⇸ PASSWORD
+	
+	/* maybe delete below */
+	@inv-admin-password: admins ∈ USER ⇸ PASSWORD
+	@inv-staff-password: staff ∈ USER ⇸ PASSWORD
+	@inv-clients-password: clients ∈ USER ⇸ PASSWORD
+	
+	/* Clients, admins and staff are all part of the USER type*/
+	/* REQ 4: There are three types of users: administrators, staff, and clients */
+	@inv-users-user: dom(users) ⊆ USER
+	@inv-admins-user: dom(admins) ⊆ USER
+	@inv-staff-user: dom(staff) ⊆ USER
+	@inv-clients-user: dom(clients) ⊆ USER
+	
+	/* REQ 5: A user can only have one role in the system */
+	@inv-user-role: partition(users, admins, staff, clients)
+	
+	/* Registered users are a union of all roles */
+	@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
+	
+	/* Logged in users is a subset of registered users */
+	@inv-login-sub-registered: login ⊆ register
+	
 event INITIALISATION
+	then
+		@act-init-users: users ≔ {root_user}
+		@act-init-admins: admins ≔ {root_user}
+		@act-init-staff: staff ≔ ∅
+		@act-init-clients: clients ≔ ∅
+		@act-init-login: login ≔ ∅
+		@act-init-register: register ≔ {root_user}
+	end
 
+	/* Register a new basic user */
+	event RegisterUser
+	any
+		user
+		pass
+	where
+		@grd1: user ∈ USER
+		@grd2: pass ∈ PASSWORD
+		@check-unregistered: user ∉ dom(register)
+		@check-nonzero-admin: card(admins) > 0
+	then
+		@add-register: register ≔ register ∪ {user ↦ pass}
+		@add-users: users ≔ users ∪ {user ↦ pass}
+	end
+	
+	/* Login a user */
+	event LoginUser
+	any
+		user
+		pass
+	where
+		@check-registered: user ∈ dom(register)
+		@check-password: pass = register(user)
+		@check-not-loggedin: user ∉ dom(login)
+	then
+		@add-login: login ≔ login ∪ {user ↦ pass}
+	end
+	
+	/* Logout a user */
+	event LogoutUser
+	any
+		user
+		pass
+	where
+		@check-loggedin: user ∈ dom(login)
+		@check-password: pass = login(user)
+	then
+		@remove-login: login ≔ login ∖ {user ↦ pass}
+	end
 end
 
