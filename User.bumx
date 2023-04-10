@@ -11,6 +11,7 @@ variables
 invariants
 	/* Users can have the same passwords. A many to one relationship*/
 	/* 2 ways of modelling: Tokens and Partitions */
+	/* or maybe only registered users have password? */
 	@inv-user-password: users ∈ USER ⇸ PASSWORD
 	
 	/* maybe delete below */
