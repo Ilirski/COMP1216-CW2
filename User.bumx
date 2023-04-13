@@ -3,7 +3,6 @@ sees UserContext
 variables
 	users
 	login
-	register
 	
 	admins
 	staff
@@ -32,22 +31,31 @@ invariants
 	/* Registered users are a union of all roles */
 	//users can be assumed to be register so no need variable called register
 	
-	@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
+	//@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
 	
 	/* Logged in users is a subset of registered users */
-	@inv-login-sub-registered: login ⊆ register
+	@inv-login-sub-registered: login ⊆ users
 	
 event INITIALISATION
 	then
-		@act-init-users: users ≔ {root_user}
-		@act-init-admins: admins ≔ {root_user}
+		@act-init-users: users ≔ ∅
+		@act-init-admins: admins ≔ ∅
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
 		@act-init-login: login ≔ ∅
-		@act-init-register: register ≔ {root_user}
 	end
+	
+event addAdmin
+any a p where
+@grd1: a ∈ USER
+@grd2: p ∈ PASSWORD
+then
+@act1: admins ≔ admins ∪ {a ↦ p}
+@act2: users ≔ users ∪ {a ↦ p}
 
-	/* Register a new basic user */
+end
+
+	/* Register a new basic user
 	event RegisterUser
 	any
 		user
@@ -62,11 +70,13 @@ event INITIALISATION
 		@add-users: users ≔ users ∪ {user ↦ pass}
 	end
 	
-	/* Login a user */
+	/* 
+	
+	/* Login a user
 	event LoginUser
 	any
 		user
-		pass
+		pass 
 	where
 		@check-registered: user ∈ dom(register)
 		@check-password: pass = register(user)
@@ -74,8 +84,9 @@ event INITIALISATION
 	then
 		@add-login: login ≔ login ∪ {user ↦ pass}
 	end
+	*/
 	
-	/* Logout a user */
+	/* Logout a user
 	event LogoutUser
 	any
 		user
@@ -86,5 +97,6 @@ event INITIALISATION
 	then
 		@remove-login: login ≔ login ∖ {user ↦ pass}
 	end
+	*/
 end
 
