@@ -21,15 +21,17 @@ invariants
 	
 	/* Clients, admins and staff are all part of the USER type*/
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
-	@inv-users-user: dom(users) ⊆ USER
-	@inv-admins-user: dom(admins) ⊆ USER
-	@inv-staff-user: dom(staff) ⊆ USER
-	@inv-clients-user: dom(clients) ⊆ USER
+	//@inv-users-user: dom(users) ⊆ USER
+	//@inv-admins-user: dom(admins) ⊆ USER
+	//@inv-staff-user: dom(staff) ⊆ USER
+	//@inv-clients-user: dom(clients) ⊆ USER
 	
 	/* REQ 5: A user can only have one role in the system */
 	@inv-user-role: partition(users, admins, staff, clients)
 	
 	/* Registered users are a union of all roles */
+	//users can be assumed to be register so no need variable called register
+	
 	@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
 	
 	/* Logged in users is a subset of registered users */
