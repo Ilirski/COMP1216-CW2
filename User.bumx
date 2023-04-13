@@ -12,32 +12,26 @@ invariants
 	/* Users can have the same passwords. A many to one relationship*/
 	/* 2 ways of modelling: Tokens and Partitions */
 	/* or maybe only registered users have password? */
-	@inv-user-password: users ∈ USER ⇸ PASSWORD
-	
-	/* maybe delete below */
-	@inv-admin-password: admins ∈ USER ⇸ PASSWORD
-	@inv-staff-password: staff ∈ USER ⇸ PASSWORD
-	@inv-clients-password: clients ∈ USER ⇸ PASSWORD
+	@inv-user-password: register ∈ USER ⇸ PASSWORD
+
 	
 	/* Clients, admins and staff are all part of the USER type*/
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	@inv-users-user: dom(users) ⊆ USER
-	@inv-admins-user: dom(admins) ⊆ USER
-	@inv-staff-user: dom(staff) ⊆ USER
-	@inv-clients-user: dom(clients) ⊆ USER
 	
 	/* REQ 5: A user can only have one role in the system */
 	@inv-user-role: partition(users, admins, staff, clients)
+	@inv-user-login: partition(users, logged_in, logged_out)
 	
 	/* Registered users are a union of all roles */
 	@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
 	
 	/* Logged in users is a subset of registered users */
-	@inv-login-sub-registered: login ⊆ register
+	@inv-login-sub-registered: logged_in ⊆ register
 	
 event INITIALISATION
 	then
-		@act-init-users: users ≔ {root_user}
+		@act-init-users: users ≔ {root_user → root_password}
 		@act-init-admins: admins ≔ {root_user}
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
