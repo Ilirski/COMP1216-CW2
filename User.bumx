@@ -2,41 +2,40 @@ machine User
 sees UserContext
 variables
 	users
-	login
+	logged_in
+	logged_out
 	
 	admins
 	staff
 	clients
 invariants
-	/* Users can have the same passwords. A many to one relationship*/
-	/* 2 ways of modelling: Tokens and Partitions */
-	/* or maybe only registered users have password? */
-	@inv-user-password: register ∈ USER ⇸ PASSWORD
-
-	
 	/* Clients, admins and staff are all part of the USER type*/
+	
+	/* Users can have the same passwords. A many to one relationship*/
+	@inv-user-password: users ∈ USER ⇸ PASSWORD
+	
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	@inv-users-user: dom(users) ⊆ USER
 	
 	/* REQ 5: A user can only have one role in the system */
 	@inv-user-role: partition(users, admins, staff, clients)
+	
+	/* Users can either be logged in or logged out */
 	@inv-user-login: partition(users, logged_in, logged_out)
 	
 	/* Registered users are a union of all roles */
-	//users can be assumed to be register so no need variable called register
 	
-	//@inv-login-registered: register = users ∪ admins ∪ staff ∪ clients
-	
-	/* Logged in users is a subset of registered users */
-	@inv-login-sub-registered: logged_in ⊆ register
+	/* Logged in users is a subset of registered users. Users are assumed to be registered */
+	@inv-login-sub-registered: logged_in ⊆ users
 	
 event INITIALISATION
 	then
-		@act-init-users: users ≔ {root_user → root_password}
-		@act-init-admins: admins ≔ {root_user}
+		@act-init-users: users ≔ ∅
+		@act-init-admins: admins ≔ {root_user ↦ root_password}
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
-		@act-init-login: login ≔ ∅
+		@act-init-logged-out: logged_out ≔ ∅
+		@act-init-logged-in: logged_in ≔ ∅
 	end
 	
 event addAdmin
