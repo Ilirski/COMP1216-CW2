@@ -62,7 +62,7 @@ then
 end
 
 
-event AddMedicne
+event AddMedicine
 any 
 	pharmacy
 	medicine_name
@@ -86,4 +86,9 @@ any
 where
 	@grd1: client ∈ clients 
 	@grd2: result = prescriptions(nric(client))
+end
+
+event LoginUser extends LoginUser
+end
+
 end
