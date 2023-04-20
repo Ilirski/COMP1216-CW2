@@ -4,8 +4,9 @@ sees UserContextCopy
 variables
 	accounts
 	registered
-	login
+	logged_in
 
+	roles
 	admins
 	staff
 	clients
@@ -16,16 +17,16 @@ invariants
 	@typeof-registered: registered ⊆ USER
       
     // Every registered user must have exactly one password.
-    // The same password (or hash) can belong to one or many registereded users.
+    // The same password (or hash) can belong to one or many registered users.
     // (1..*) -> (1) but for some reason no work
 	@typeof-account: accounts ∈ registered → PASSWORD
     
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	/* REQ 5: A registered user can only have one role in the system */
-	@typeof-user-roles: partition(registered, admins, staff, clients)
+	@typeof-user-roles: roles ∈ registered → ROLE
 	
 	/* Logged in users is a subset of registered users */
-	@typeof-login: login ⊆ registered
+	@typeof-logged_in: logged_in ⊆ registered
 	
 event INITIALISATION
 	then
@@ -35,7 +36,7 @@ event INITIALISATION
 //		@act-init-accounts: accounts(root_user) ≔ root_password
 		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
 		@act-init-registered: registered ≔ {root_user}
-		@act-init-login: login ≔ ∅
+		@act-init-logged_in: logged_in ≔ ∅
 	end
 	
 	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
@@ -44,11 +45,11 @@ event INITIALISATION
 		user
 		pass 
 	where
-		@check-registereded: user ∈ registered
+		@check-registered: user ∈ registered
 		@check-password: accounts(user)= pass
-		@check-not-loggedin: user ∉ login
+		@check-not-logged-in: user ∉ logged_in
 	then
-		@add-login: login ≔ login ∪ {user}
+		@add-logged-in: logged_in ≔ logged_in ∪ {user}
 	end
 	
 	/* REQ 3: A logged-in user can log out of the system. */
@@ -57,10 +58,10 @@ event INITIALISATION
 		user
 		pass
 	where
-		@check-loggedin: user ∈ login
+		@check-loggedin: user ∈ logged_in
 		@check-password: pass = accounts(user)
 	then
-		@remove-login: login ≔ login ∖ {user}
+		@remove-logged-in: logged_in ≔ logged_in ∖ {user}
 	end
 	
 	/* REQ 9: A logged-in user can change their password. */
@@ -69,7 +70,7 @@ event INITIALISATION
 			user
 			new_pass
 		where
-			@user-logged-in: user ∈ login
+			@user-logged-in: user ∈ logged_in
 			@new-pass: new_pass ∈ PASSWORD
 			@password-is-different: accounts(user) ≠ new_pass
 		then
@@ -92,13 +93,14 @@ event INITIALISATION
 	end
 	
 	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
-	event registerAdmin
+	event RegisterAdmin
 		any 
 			admin
 			user
+			user_role
 			pass
 		where
-			@admin-logged-in: admin ∈ admins ∩ login
+			@admin-logged-in: admin ∈ admins ∩ logged_in
 			@user: user ∈ USER // USER and not users
 			@not-registered: user ∉ registered 
 			@pass: pass ∈ PASSWORD
@@ -109,13 +111,13 @@ event INITIALISATION
 	end
 		
 	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
-	event registerStaff
+	event RegisterStaff
 		any 
 			admin
 			user
 			pass
 		where
-			@admin-logged-in: admin ∈ admins ∩ login
+			@admin-logged-in: admin ∈ admins ∩ logged_in
 			@user: user ∈ USER // USER and not users
 			@not-registered: user ∉ registered
 			@pass: pass ∈ PASSWORD
