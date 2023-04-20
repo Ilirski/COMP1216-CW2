@@ -1,4 +1,5 @@
-machine Pharmacy refines User
+machine Pharmacy 
+refines User
 sees PharmacyContext
 
 variables
@@ -87,3 +88,19 @@ where
 	@grd1: client ∈ clients 
 	@grd2: result = prescriptions(nric(client))
 end
+
+
+event LoginUser extends LoginUser
+end
+event LogoutUser extends LogoutUser 
+end
+event ChangeUserPassword extends ChangeUserPassword 
+end
+event RegisterClient extends  RegisterClient 
+end
+event RegisterAdmin extends RegisterAdmin 
+end
+event RegisterStaff extends RegisterStaff
+ end
+ 
+
