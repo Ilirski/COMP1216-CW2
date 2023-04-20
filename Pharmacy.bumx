@@ -15,7 +15,7 @@ variables
 	medicine_count
 	client_name
 	nric
-	prescription
+	prescriptions
 	medicine_info
 	last_medicine_date
 	pharmacy_stock
@@ -28,9 +28,9 @@ invariants
 	@inv3: medicine_count ∈ BATCH_NUM ↔ ℤ
 	@inv4: client_name ∈ NRIC ⇸ USER_NAME
 	@inv5: nric ∈ USER ↔ NRIC
-	@inv6: prescription ∈ NRIC ↔ PRESCRIPTION
-	@inv7: medicine_info ∈ PRESCRIPTION ↔ BATCH_NUM
-	@inv8: last_medicine_date ∈ PRESCRIPTION ↔ DATE
+	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+	@inv8: last_medicine_date ∈ PRESCRIPTIONS ↔ DATE
 	@inv9: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
 	@inv10: appointment_num ∈ PHARMACIES ↔ ℤ
 
@@ -42,7 +42,7 @@ then
 	@act3: medicine_count ≔ ∅ 
 	@act4: client_name ≔ ∅
 	@act5: nric ≔ ∅
-	@act6: prescription ≔ ∅
+	@act6: prescriptions ≔ ∅
 	@act7: medicine_info ≔ ∅
 	@act8: last_medicine_date ≔ ∅ 
 	@act9: pharmacy_stock ≔ ∅
@@ -74,16 +74,16 @@ where
 	@grd3: medicine_name ∈ MEDICINE_NAME
 	@grd4: count ∈ ℤ
 then
-	@act1: pahrmacy_stock ≔ pahrmacy_stock ∪ {pharmacy ↦ batch}
+	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
 	@act2: medicine ≔ medicine ∪ {batch ↦ medicine_name}
 	@act3: medicine_count ≔ {batch ↦ count}
 end
-/* 
-event getName
+
+event getPrescription
 any
-	 c
-	 p
+	 client
 	 result
 where
-	@grd1: c ∈ 
-*/
+	@grd1: client ∈ clients 
+	@grd2: result = prescriptions(nric(client))
+end
