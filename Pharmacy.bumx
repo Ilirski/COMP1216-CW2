@@ -1,12 +1,10 @@
-machine Pharmacy 
-refines User
+machine Pharmacy refines User
 sees PharmacyContext
 
 variables
 	accounts
-	register
-	login
-	users
+	registered
+	logged_in
 	admins
 	staff
 	clients
@@ -108,7 +106,7 @@ end
 event ChangeUserPassword extends ChangeUserPassword 
 end
 
-event RegisterClient extends  RegisterClient 
+event registerClient extends  registerClient 
 any 
 	ic
 	client

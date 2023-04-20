@@ -25,7 +25,7 @@
     </org.eventb.core.prProof>
     <org.eventb.core.prProof name="getPrescription/grd2/WD" org.eventb.core.confidence="0" org.eventb.core.prFresh="" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="p1,p2" org.eventb.core.prSets="NRIC,USER">
         <org.eventb.core.lang name="L"/>
-        <org.eventb.core.prRule name="r0" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="Partition rewrites in hyp (partition(register,admins,staff,clients))" org.eventb.core.prHyps="">
+        <org.eventb.core.prRule name="r0" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="Partition rewrites in hyp (partition(registered,admins,staff,clients))" org.eventb.core.prHyps="">
             <org.eventb.core.prAnte name="'">
                 <org.eventb.core.prHypAction name="REWRITE0" org.eventb.core.prHidden="p2" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p3,p4,p5,p6"/>
                 <org.eventb.core.prHypAction name="SELECT1" org.eventb.core.prHyps="p3,p4,p5,p6"/>
@@ -44,7 +44,7 @@
                         <org.eventb.core.prHypAction name="HIDE10" org.eventb.core.prHyps="p17"/>
                         <org.eventb.core.prRule name="r2" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="∧ goal" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="">
                             <org.eventb.core.prAnte name="'" org.eventb.core.prGoal="p18">
-                                <org.eventb.core.prRule name="r3" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="eh with register=admins∪staff∪clients" org.eventb.core.prHyps="p3">
+                                <org.eventb.core.prRule name="r3" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="eh with registered=admins∪staff∪clients" org.eventb.core.prHyps="p3">
                                     <org.eventb.core.prAnte name="'">
                                         <org.eventb.core.prHypAction name="HIDE0" org.eventb.core.prHyps="p3"/>
                                     </org.eventb.core.prAnte>
@@ -63,22 +63,20 @@
         <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
         <org.eventb.core.prIdent name="clients" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prIdent name="nric" org.eventb.core.type="ℙ(USER×NRIC)"/>
-        <org.eventb.core.prIdent name="register" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prIdent name="registered" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prIdent name="staff" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prPred name="p7" org.eventb.core.predicate="root_user∈USER">
             <org.eventb.core.prIdent name="root_user" org.eventb.core.type="USER"/>
         </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p9" org.eventb.core.predicate="registered⊆USER"/>
         <org.eventb.core.prPred name="p14" org.eventb.core.predicate="medicine_info∈PRESCRIPTIONS ↔ BATCH_NUM">
             <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
             <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
             <org.eventb.core.prIdent name="medicine_info" org.eventb.core.type="ℙ(PRESCRIPTIONS×BATCH_NUM)"/>
         </org.eventb.core.prPred>
         <org.eventb.core.prPred name="p0" org.eventb.core.predicate="client∈dom(nric)∧nric∈USER ⇸ NRIC"/>
-        <org.eventb.core.prPred name="p2" org.eventb.core.predicate="partition(register,admins,staff,clients)"/>
-        <org.eventb.core.prPred name="p9" org.eventb.core.predicate="users⊆USER">
-            <org.eventb.core.prIdent name="users" org.eventb.core.type="ℙ(USER)"/>
-        </org.eventb.core.prPred>
-        <org.eventb.core.prPred name="p3" org.eventb.core.predicate="register=admins∪staff∪clients"/>
+        <org.eventb.core.prPred name="p2" org.eventb.core.predicate="partition(registered,admins,staff,clients)"/>
+        <org.eventb.core.prPred name="p3" org.eventb.core.predicate="registered=admins∪staff∪clients"/>
         <org.eventb.core.prPred name="p5" org.eventb.core.predicate="admins∩clients=(∅ ⦂ ℙ(USER))"/>
         <org.eventb.core.prPred name="p4" org.eventb.core.predicate="admins∩staff=(∅ ⦂ ℙ(USER))"/>
         <org.eventb.core.prPred name="p8" org.eventb.core.predicate="root_password∈PASSWORD">
@@ -120,11 +118,11 @@
             <org.eventb.core.prIdent name="PHARMACIES" org.eventb.core.type="ℙ(PHARMACIES)"/>
             <org.eventb.core.prIdent name="appointment_num" org.eventb.core.type="ℙ(PHARMACIES×ℤ)"/>
         </org.eventb.core.prPred>
-        <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
-        <org.eventb.core.prReas name="r4" org.eventb.core.prRID="org.eventb.core.seqprover.isFunGoal"/>
         <org.eventb.core.prReas name="r0" org.eventb.core.prRID="org.eventb.core.seqprover.partitionRewrites"/>
+        <org.eventb.core.prReas name="r4" org.eventb.core.prRID="org.eventb.core.seqprover.isFunGoal"/>
         <org.eventb.core.prReas name="r2" org.eventb.core.prRID="org.eventb.core.seqprover.conj:0"/>
         <org.eventb.core.prReas name="r3" org.eventb.core.prRID="org.eventb.core.seqprover.eqL1:1"/>
+        <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
     </org.eventb.core.prProof>
     <org.eventb.core.prProof name="INITIALISATION/inv5/INV" org.eventb.core.confidence="1000" org.eventb.core.prFresh="" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="" org.eventb.core.prSets="NRIC,USER">
         <org.eventb.core.lang name="L"/>
@@ -150,7 +148,7 @@
     </org.eventb.core.prProof>
     <org.eventb.core.prProof name="AddPrescription/act1/WD" org.eventb.core.confidence="0" org.eventb.core.prFresh="" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="p1,p2" org.eventb.core.prSets="NRIC,USER">
         <org.eventb.core.lang name="L"/>
-        <org.eventb.core.prRule name="r0" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="Partition rewrites in hyp (partition(register,admins,staff,clients))" org.eventb.core.prHyps="">
+        <org.eventb.core.prRule name="r0" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="Partition rewrites in hyp (partition(registered,admins,staff,clients))" org.eventb.core.prHyps="">
             <org.eventb.core.prAnte name="'">
                 <org.eventb.core.prHypAction name="REWRITE0" org.eventb.core.prHidden="p2" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p3,p4,p5,p6"/>
                 <org.eventb.core.prHypAction name="SELECT1" org.eventb.core.prHyps="p3,p4,p5,p6"/>
@@ -173,7 +171,7 @@
                                 <org.eventb.core.prHypAction name="HIDE11" org.eventb.core.prHyps="p8"/>
                                 <org.eventb.core.prRule name="r3" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="∧ goal" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="">
                                     <org.eventb.core.prAnte name="'" org.eventb.core.prGoal="p21">
-                                        <org.eventb.core.prRule name="r4" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="eh with register=admins∪staff∪clients" org.eventb.core.prHyps="p3">
+                                        <org.eventb.core.prRule name="r4" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="eh with registered=admins∪staff∪clients" org.eventb.core.prHyps="p3">
                                             <org.eventb.core.prAnte name="'">
                                                 <org.eventb.core.prHypAction name="HIDE0" org.eventb.core.prHyps="p3"/>
                                             </org.eventb.core.prAnte>
@@ -194,32 +192,30 @@
         <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
         <org.eventb.core.prIdent name="clients" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prIdent name="nric" org.eventb.core.type="ℙ(USER×NRIC)"/>
-        <org.eventb.core.prIdent name="register" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prIdent name="registered" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prIdent name="staff" org.eventb.core.type="ℙ(USER)"/>
         <org.eventb.core.prPred name="p10" org.eventb.core.predicate="root_user∈USER">
             <org.eventb.core.prIdent name="root_user" org.eventb.core.type="USER"/>
         </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p12" org.eventb.core.predicate="registered⊆USER"/>
         <org.eventb.core.prPred name="p17" org.eventb.core.predicate="medicine_info∈PRESCRIPTIONS ↔ BATCH_NUM">
             <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
             <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
             <org.eventb.core.prIdent name="medicine_info" org.eventb.core.type="ℙ(PRESCRIPTIONS×BATCH_NUM)"/>
         </org.eventb.core.prPred>
         <org.eventb.core.prPred name="p0" org.eventb.core.predicate="client∈dom(nric)∧nric∈USER ⇸ NRIC"/>
-        <org.eventb.core.prPred name="p2" org.eventb.core.predicate="partition(register,admins,staff,clients)"/>
         <org.eventb.core.prPred name="p7" org.eventb.core.predicate="prescription∈PRESCRIPTIONS∧prescription∉ran(prescriptions)">
             <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
             <org.eventb.core.prIdent name="prescription" org.eventb.core.type="PRESCRIPTIONS"/>
             <org.eventb.core.prIdent name="prescriptions" org.eventb.core.type="ℙ(NRIC×PRESCRIPTIONS)"/>
         </org.eventb.core.prPred>
-        <org.eventb.core.prPred name="p12" org.eventb.core.predicate="users⊆USER">
-            <org.eventb.core.prIdent name="users" org.eventb.core.type="ℙ(USER)"/>
-        </org.eventb.core.prPred>
-        <org.eventb.core.prPred name="p3" org.eventb.core.predicate="register=admins∪staff∪clients"/>
+        <org.eventb.core.prPred name="p2" org.eventb.core.predicate="partition(registered,admins,staff,clients)"/>
         <org.eventb.core.prPred name="p9" org.eventb.core.predicate="¬prescription∈ran(prescriptions)">
             <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
             <org.eventb.core.prIdent name="prescription" org.eventb.core.type="PRESCRIPTIONS"/>
             <org.eventb.core.prIdent name="prescriptions" org.eventb.core.type="ℙ(NRIC×PRESCRIPTIONS)"/>
         </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p3" org.eventb.core.predicate="registered=admins∪staff∪clients"/>
         <org.eventb.core.prPred name="p5" org.eventb.core.predicate="admins∩clients=(∅ ⦂ ℙ(USER))"/>
         <org.eventb.core.prPred name="p4" org.eventb.core.predicate="admins∩staff=(∅ ⦂ ℙ(USER))"/>
         <org.eventb.core.prPred name="p11" org.eventb.core.predicate="root_password∈PASSWORD">
@@ -265,12 +261,12 @@
             <org.eventb.core.prIdent name="PHARMACIES" org.eventb.core.type="ℙ(PHARMACIES)"/>
             <org.eventb.core.prIdent name="appointment_num" org.eventb.core.type="ℙ(PHARMACIES×ℤ)"/>
         </org.eventb.core.prPred>
-        <org.eventb.core.prReas name="r2" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
-        <org.eventb.core.prReas name="r5" org.eventb.core.prRID="org.eventb.core.seqprover.isFunGoal"/>
         <org.eventb.core.prReas name="r0" org.eventb.core.prRID="org.eventb.core.seqprover.partitionRewrites"/>
+        <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.autoRewritesL4:0"/>
+        <org.eventb.core.prReas name="r5" org.eventb.core.prRID="org.eventb.core.seqprover.isFunGoal"/>
         <org.eventb.core.prReas name="r3" org.eventb.core.prRID="org.eventb.core.seqprover.conj:0"/>
         <org.eventb.core.prReas name="r4" org.eventb.core.prRID="org.eventb.core.seqprover.eqL1:1"/>
-        <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.autoRewritesL4:0"/>
+        <org.eventb.core.prReas name="r2" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
     </org.eventb.core.prProof>
     <org.eventb.core.prProof name="AddPrescription/grd3/WD" org.eventb.core.confidence="0" org.eventb.core.prFresh="" org.eventb.core.prGoal="p0" org.eventb.core.prHyps="p1,p2" org.eventb.core.prSets="NRIC,USER">
         <org.eventb.core.lang name="L"/>
@@ -527,5 +523,151 @@
         <org.eventb.core.prReas name="r0" org.eventb.core.prRID="org.eventb.core.seqprover.partitionRewrites"/>
         <org.eventb.core.prReas name="r3" org.eventb.core.prRID="org.eventb.core.seqprover.eqL1:1"/>
         <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.autoRewritesL4:0"/>
+    </org.eventb.core.prProof>
+    <org.eventb.core.prProof name="registerClient/inv5/INV" org.eventb.core.confidence="0" org.eventb.core.prFresh="" org.eventb.core.prHyps="p0" org.eventb.core.prSets="USER">
+        <org.eventb.core.lang name="L"/>
+        <org.eventb.core.prRule name="r0" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="Partition rewrites in hyp (partition(registered,admins,staff,clients))" org.eventb.core.prHyps="">
+            <org.eventb.core.prAnte name="'">
+                <org.eventb.core.prHypAction name="REWRITE0" org.eventb.core.prHidden="p0" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p1,p2,p3,p4"/>
+                <org.eventb.core.prHypAction name="SELECT1" org.eventb.core.prHyps="p1,p2,p3,p4"/>
+                <org.eventb.core.prRule name="r1" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="simplification rewrites" org.eventb.core.prHyps="">
+                    <org.eventb.core.prAnte name="'">
+                        <org.eventb.core.prHypAction name="REWRITE0" org.eventb.core.prHidden="p5" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p6"/>
+                        <org.eventb.core.prHypAction name="REWRITE1" org.eventb.core.prHidden="p7" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p8,p9"/>
+                        <org.eventb.core.prHypAction name="REWRITE2" org.eventb.core.prHidden="p10" org.eventb.core.prHyps="" org.eventb.core.prInfHyps="p11,p12,p13"/>
+                        <org.eventb.core.prRule name="r2" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="type rewrites" org.eventb.core.prHyps="">
+                            <org.eventb.core.prAnte name="'">
+                                <org.eventb.core.prHypAction name="HIDE0" org.eventb.core.prHyps="p14"/>
+                                <org.eventb.core.prHypAction name="HIDE1" org.eventb.core.prHyps="p15"/>
+                                <org.eventb.core.prHypAction name="HIDE2" org.eventb.core.prHyps="p16"/>
+                                <org.eventb.core.prHypAction name="HIDE3" org.eventb.core.prHyps="p17"/>
+                                <org.eventb.core.prHypAction name="HIDE4" org.eventb.core.prHyps="p18"/>
+                                <org.eventb.core.prHypAction name="HIDE5" org.eventb.core.prHyps="p19"/>
+                                <org.eventb.core.prHypAction name="HIDE6" org.eventb.core.prHyps="p20"/>
+                                <org.eventb.core.prHypAction name="HIDE7" org.eventb.core.prHyps="p21"/>
+                                <org.eventb.core.prHypAction name="HIDE8" org.eventb.core.prHyps="p22"/>
+                                <org.eventb.core.prHypAction name="HIDE9" org.eventb.core.prHyps="p23"/>
+                                <org.eventb.core.prHypAction name="HIDE10" org.eventb.core.prHyps="p24"/>
+                                <org.eventb.core.prHypAction name="HIDE11" org.eventb.core.prHyps="p25"/>
+                                <org.eventb.core.prHypAction name="HIDE12" org.eventb.core.prHyps="p26"/>
+                                <org.eventb.core.prHypAction name="HIDE13" org.eventb.core.prHyps="p27"/>
+                                <org.eventb.core.prHypAction name="HIDE14" org.eventb.core.prHyps="p8"/>
+                                <org.eventb.core.prRule name="r3" org.eventb.core.confidence="1000" org.eventb.core.prDisplay="eh with registered=admins∪staff∪clients" org.eventb.core.prHyps="p1">
+                                    <org.eventb.core.prAnte name="'">
+                                        <org.eventb.core.prHypAction name="FORWARD_INF0" org.eventb.core.prHyps="p6" org.eventb.core.prInfHyps="p28"/>
+                                        <org.eventb.core.prHypAction name="DESELECT1" org.eventb.core.prHyps="p6"/>
+                                        <org.eventb.core.prHypAction name="HIDE2" org.eventb.core.prHyps="p1"/>
+                                    </org.eventb.core.prAnte>
+                                </org.eventb.core.prRule>
+                            </org.eventb.core.prAnte>
+                        </org.eventb.core.prRule>
+                    </org.eventb.core.prAnte>
+                </org.eventb.core.prRule>
+            </org.eventb.core.prAnte>
+            <org.eventb.core.prString name=".pos" org.eventb.core.prSValue=""/>
+        </org.eventb.core.prRule>
+        <org.eventb.core.prIdent name="admins" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prIdent name="clients" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prIdent name="registered" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prIdent name="staff" org.eventb.core.type="ℙ(USER)"/>
+        <org.eventb.core.prPred name="p16" org.eventb.core.predicate="registered⊆USER"/>
+        <org.eventb.core.prPred name="p21" org.eventb.core.predicate="medicine_info∈PRESCRIPTIONS ↔ BATCH_NUM">
+            <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
+            <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
+            <org.eventb.core.prIdent name="medicine_info" org.eventb.core.type="ℙ(PRESCRIPTIONS×BATCH_NUM)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p0" org.eventb.core.predicate="partition(registered,admins,staff,clients)"/>
+        <org.eventb.core.prPred name="p1" org.eventb.core.predicate="registered=admins∪staff∪clients"/>
+        <org.eventb.core.prPred name="p3" org.eventb.core.predicate="admins∩clients=(∅ ⦂ ℙ(USER))"/>
+        <org.eventb.core.prPred name="p6" org.eventb.core.predicate="¬user∈registered">
+            <org.eventb.core.prIdent name="user" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p9" org.eventb.core.predicate="¬ic∈ran(nric)">
+            <org.eventb.core.prIdent name="NRIC" org.eventb.core.type="ℙ(NRIC)"/>
+            <org.eventb.core.prIdent name="ic" org.eventb.core.type="NRIC"/>
+            <org.eventb.core.prIdent name="nric" org.eventb.core.type="ℙ(USER×NRIC)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p20" org.eventb.core.predicate="prescriptions∈NRIC ↔ PRESCRIPTIONS">
+            <org.eventb.core.prIdent name="NRIC" org.eventb.core.type="ℙ(NRIC)"/>
+            <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
+            <org.eventb.core.prIdent name="prescriptions" org.eventb.core.type="ℙ(NRIC×PRESCRIPTIONS)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p10" org.eventb.core.predicate="client∉clients∧client∉admins∧client∉staff">
+            <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p28" org.eventb.core.predicate="¬user∈admins∪staff∪clients">
+            <org.eventb.core.prIdent name="user" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p11" org.eventb.core.predicate="¬client∈clients">
+            <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p8" org.eventb.core.predicate="ic∈NRIC">
+            <org.eventb.core.prIdent name="NRIC" org.eventb.core.type="ℙ(NRIC)"/>
+            <org.eventb.core.prIdent name="ic" org.eventb.core.type="NRIC"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p26" org.eventb.core.predicate="pass∈PASSWORD">
+            <org.eventb.core.prIdent name="PASSWORD" org.eventb.core.type="ℙ(PASSWORD)"/>
+            <org.eventb.core.prIdent name="pass" org.eventb.core.type="PASSWORD"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p13" org.eventb.core.predicate="¬client∈staff">
+            <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p18" org.eventb.core.predicate="medicine∈BATCH_NUM ↔ MEDICINE_NAME">
+            <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
+            <org.eventb.core.prIdent name="MEDICINE_NAME" org.eventb.core.type="ℙ(MEDICINE_NAME)"/>
+            <org.eventb.core.prIdent name="medicine" org.eventb.core.type="ℙ(BATCH_NUM×MEDICINE_NAME)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p14" org.eventb.core.predicate="root_user∈USER">
+            <org.eventb.core.prIdent name="root_user" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p27" org.eventb.core.predicate="client∈USER">
+            <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p25" org.eventb.core.predicate="user∈USER">
+            <org.eventb.core.prIdent name="user" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p5" org.eventb.core.predicate="user∉registered">
+            <org.eventb.core.prIdent name="user" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p2" org.eventb.core.predicate="admins∩staff=(∅ ⦂ ℙ(USER))"/>
+        <org.eventb.core.prPred name="p12" org.eventb.core.predicate="¬client∈admins">
+            <org.eventb.core.prIdent name="client" org.eventb.core.type="USER"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p15" org.eventb.core.predicate="root_password∈PASSWORD">
+            <org.eventb.core.prIdent name="PASSWORD" org.eventb.core.type="ℙ(PASSWORD)"/>
+            <org.eventb.core.prIdent name="root_password" org.eventb.core.type="PASSWORD"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p4" org.eventb.core.predicate="staff∩clients=(∅ ⦂ ℙ(USER))"/>
+        <org.eventb.core.prPred name="p7" org.eventb.core.predicate="ic∈NRIC∧ic∉ran(nric)">
+            <org.eventb.core.prIdent name="NRIC" org.eventb.core.type="ℙ(NRIC)"/>
+            <org.eventb.core.prIdent name="ic" org.eventb.core.type="NRIC"/>
+            <org.eventb.core.prIdent name="nric" org.eventb.core.type="ℙ(USER×NRIC)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p19" org.eventb.core.predicate="medicine_count∈BATCH_NUM ↔ ℤ">
+            <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
+            <org.eventb.core.prIdent name="medicine_count" org.eventb.core.type="ℙ(BATCH_NUM×ℤ)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p22" org.eventb.core.predicate="last_medicine_date∈PRESCRIPTIONS ↔ DATE">
+            <org.eventb.core.prIdent name="DATE" org.eventb.core.type="ℙ(DATE)"/>
+            <org.eventb.core.prIdent name="PRESCRIPTIONS" org.eventb.core.type="ℙ(PRESCRIPTIONS)"/>
+            <org.eventb.core.prIdent name="last_medicine_date" org.eventb.core.type="ℙ(PRESCRIPTIONS×DATE)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p17" org.eventb.core.predicate="pharmacies∈USER ↔ PHARMACIES">
+            <org.eventb.core.prIdent name="PHARMACIES" org.eventb.core.type="ℙ(PHARMACIES)"/>
+            <org.eventb.core.prIdent name="pharmacies" org.eventb.core.type="ℙ(USER×PHARMACIES)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p23" org.eventb.core.predicate="pharmacy_stock∈PHARMACIES ↔ BATCH_NUM">
+            <org.eventb.core.prIdent name="BATCH_NUM" org.eventb.core.type="ℙ(BATCH_NUM)"/>
+            <org.eventb.core.prIdent name="PHARMACIES" org.eventb.core.type="ℙ(PHARMACIES)"/>
+            <org.eventb.core.prIdent name="pharmacy_stock" org.eventb.core.type="ℙ(PHARMACIES×BATCH_NUM)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prPred name="p24" org.eventb.core.predicate="appointment_num∈PHARMACIES ↔ ℤ">
+            <org.eventb.core.prIdent name="PHARMACIES" org.eventb.core.type="ℙ(PHARMACIES)"/>
+            <org.eventb.core.prIdent name="appointment_num" org.eventb.core.type="ℙ(PHARMACIES×ℤ)"/>
+        </org.eventb.core.prPred>
+        <org.eventb.core.prReas name="r0" org.eventb.core.prRID="org.eventb.core.seqprover.partitionRewrites"/>
+        <org.eventb.core.prReas name="r1" org.eventb.core.prRID="org.eventb.core.seqprover.autoRewritesL4:0"/>
+        <org.eventb.core.prReas name="r3" org.eventb.core.prRID="org.eventb.core.seqprover.eqL1:1"/>
+        <org.eventb.core.prReas name="r2" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
     </org.eventb.core.prProof>
 </org.eventb.core.prFile>
