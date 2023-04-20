@@ -2,8 +2,10 @@ machine Pharmacy refines User
 sees PharmacyContext
 
 variables
-	users
+	accounts
+	register
 	login
+	users
 	admins
 	staff
 	clients
@@ -51,12 +53,12 @@ end
 event AddPharmacy
 any 
 	pharmacy
-	administrator
+	admin
 where
-	@grd1: p ∈ PHARMACIES ∧ p ∉ ran(pharmacies)
-	@grd3: administrator ∈ admin
+	@grd1: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
+	@grd3: admin ∈ admins
 then 
-	@act1: pharmacies ≔ {a ↦ p}
+	@act1: pharmacies ≔ {admin ↦ pharmacy}
 end
 
 
@@ -67,14 +69,14 @@ any
 	batch
 	count
 where 
-	@grd1: pharmacy ∈ pharmacies
-	@grd2: batch ∈ BATCH ∧ b ∉ dom(medicine)
+	@grd1: pharmacy ∈ ran(pharmacies)
+	@grd2: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
 	@grd3: medicine_name ∈ MEDICINE_NAME
 	@grd4: count ∈ ℤ
 then
-	@act1: pahrmacy_stock ≔ pahrmacy_stock ∪ {p ↦ b}
-	@act2: medicine ≔ medicine ∪ {b ↦ m}
-	@act3: medicine_count ≔ {b ↦ count}
+	@act1: pahrmacy_stock ≔ pahrmacy_stock ∪ {pharmacy ↦ batch}
+	@act2: medicine ≔ medicine ∪ {batch ↦ medicine_name}
+	@act3: medicine_count ≔ {batch ↦ count}
 end
 /* 
 event getName

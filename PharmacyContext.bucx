@@ -1,6 +1,6 @@
 context PharmacyContext extends UserContext
 sets
-	PHARMACY
+	PHARMACIES
 	MEDICINE_NAME
 	BATCH_NUM
 	USER_NAME
