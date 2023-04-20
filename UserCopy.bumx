@@ -1,50 +1,40 @@
-machine User 
-sees UserContext
+machine UserCopy
+sees UserContextCopy
 
 variables
 	accounts
-	register
+	registered
 	login
-	
-	/* Note: */
-	/* Not sure if I should have a set of users */
-	/* I think the system should track a set of unregistered users */
-	/* They are analogous to visitors to a website  */
-	/* But on the other hand, it's a bit tricky to model unregistered users */
-	/* Since there's not method that adds an unregistered user */
-	users
+
 	admins
 	staff
 	clients
 invariants
       
-    /* Some users may use the system but are not registered */
-	@typeof-users: users ⊆ USER
-	
+
 	/* REQ 1: The system manages a set of registered users. */
-	@typeof-register: register ⊆ users
+	@typeof-registered: registered ⊆ USER
       
     // Every registered user must have exactly one password.
-    // The same password (or hash) can belong to one or many registered users.
+    // The same password (or hash) can belong to one or many registereded users.
     // (1..*) -> (1) but for some reason no work
-	@typeof-account: accounts ∈ register → PASSWORD
+	@typeof-account: accounts ∈ registered → PASSWORD
     
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	/* REQ 5: A registered user can only have one role in the system */
-	@typeof-user-roles: partition(register, admins, staff, clients)
+	@typeof-user-roles: partition(registered, admins, staff, clients)
 	
 	/* Logged in users is a subset of registered users */
-	@typeof-login: login ⊆ register
+	@typeof-login: login ⊆ registered
 	
 event INITIALISATION
 	then
-		@act-init-users: users ≔ {root_user}
 		@act-init-admins: admins ≔ {root_user}
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
 //		@act-init-accounts: accounts(root_user) ≔ root_password
 		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
-		@act-init-register: register ≔ {root_user}
+		@act-init-registered: registered ≔ {root_user}
 		@act-init-login: login ≔ ∅
 	end
 	
@@ -54,7 +44,7 @@ event INITIALISATION
 		user
 		pass 
 	where
-		@check-registered: user ∈ register
+		@check-registereded: user ∈ registered
 		@check-password: accounts(user)= pass
 		@check-not-loggedin: user ∉ login
 	then
@@ -86,24 +76,23 @@ event INITIALISATION
 			@set-password: accounts(user) ≔ new_pass
 	end
 	
-	/* REQ 8: A client can register an account with the system directly. */
-	event RegisterClient
+	/* REQ 8: A client can registered an account with the system directly. */
+	event registerClient
 		any
 			user
 			pass
 		where
 			@user: user ∈ USER
 			@pass: pass ∈ PASSWORD
-			@check-unregistered: user ∉ register
+			@check-unregistered: user ∉ registered
 		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
+			@add-user: registered ≔ registered ∪ {user}
 			@add-client: clients ≔ clients ∪ {user}
 			@set-password: accounts(user) ≔ pass
 	end
 	
-	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
-	event RegisterAdmin
+	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
+	event registerAdmin
 		any 
 			admin
 			user
@@ -111,17 +100,16 @@ event INITIALISATION
 		where
 			@admin-logged-in: admin ∈ admins ∩ login
 			@user: user ∈ USER // USER and not users
-			@not-registered: user ∉ register 
+			@not-registered: user ∉ registered 
 			@pass: pass ∈ PASSWORD
 		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
+			@add-user: registered ≔ registered ∪ {user}
 			@add-admin: admins ≔ admins ∪ {user}
 			@set-password: accounts(user) ≔ pass
 	end
 		
-	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
-	event RegisterStaff
+	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
+	event registerStaff
 		any 
 			admin
 			user
@@ -129,13 +117,11 @@ event INITIALISATION
 		where
 			@admin-logged-in: admin ∈ admins ∩ login
 			@user: user ∈ USER // USER and not users
-			@not-registered: user ∉ register
+			@not-registered: user ∉ registered
 			@pass: pass ∈ PASSWORD
 		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
+			@add-user: registered ≔ registered ∪ {user}
 			@add-staff: staff ≔ staff ∪ {user}
 			@set-password: accounts(user) ≔ pass
 	end
 end	
-
