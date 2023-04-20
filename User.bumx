@@ -1,95 +1,145 @@
 machine User 
 sees UserContext
+
 variables
-	users
-	logged_in
-	logged_out
+	accounts
+	register
+	login
 	
+//	logged_in
+//	logged_out
+	
+	users
 	admins
 	staff
 	clients
 invariants
-	/* Clients, admins and staff are all part of the USER type*/
+      
+    /* REQ 1: The system manages a set of registered users. */
+	/* However, some users may not have a password as they may not have an account */
+	/* e.g: client */
+	/* Therefore, we use a subset instead of strict subset here */
+	@inv-users-register: users ⊆ USER
 	
-	/* Users can have the same passwords. A many to one relationship*/
-	@inv-user-password: users ∈ USER ⇸ PASSWORD
-	
+	/* Registered users is a subset of users */
+	@inv-login-sub-login: register ⊆ USER
+      
+    // Each user has exactly 1 PASSWORD
+	// A PASSWORD may be used by many users
+	@inv-account: accounts ∈ register → PASSWORD
+    
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
-	@inv-users-user: dom(users) ⊆ USER
+	/* REQ 5: A registered user can only have one role in the system */
+	@inv-user-role: partition(register, admins, staff, clients)
 	
-	/* REQ 5: A user can only have one role in the system */
-	@inv-user-role: partition(users, admins, staff, clients)
+	/* Logged in users is a subset of registered users */
+	@inv-login-sub-registered: login ⊆ register
 	
-	/* Users can either be logged in or logged out */
-	@inv-user-login: partition(users, logged_in, logged_out)
 	
-	/* Registered users are a union of all roles */
-	
-	/* Logged in users is a subset of registered users. Users are assumed to be registered */
-	@inv-login-sub-registered: logged_in ⊆ users
+		
+
+//	/* Registered users can have the same passwords. A many to one relationship*/
+//    /* @inv-user-password: registered ∈ USER ⇸ PASSWORD */
+//    
+//	/* REQ 1: The system manages a set of registered users. */
+//	/* However, some users may not have a password as they may not have an account */
+//	/* e.g: client */
+//	/* Therefore, we use a subset instead of strict subset here */
+//	@inv-users-register: registered ⊆ USER
+//	
+//	/* REQ 4: There are three types of users: administrators, staff, and clients */
+//	/* REQ 5: A registered user can only have one role in the system */
+//	/* Clients, admins and staff are all part of the USER type*/
+//	@inv-user-role: partition(registered, admins, staff, clients)
+//	
+//	/* Users can either be logged in or logged out */
+//	@inv-user-login: partition(registered, logged_in, logged_out)
+//	
+//	/* Logged in users is a subset of registered users. Users are assumed to be registered */
+//	@inv-login-sub-registered: logged_in ⊆ registered
+//	
+//	/* Logged in users is a subset of registered users */
+//	/* @inv-login-sub-registered: login ⊆ register */s
+//	
+//	/* Should we use a total function here */
+//	/*Not sure what's the difference between above and below */
+//	/* @inv7: inv-user-account: registered ∈ registered → PASSWORD */
+//	@inv-user-account: account ∈ USER ⇸ PASSWORD
 	
 event INITIALISATION
 	then
-		@act-init-users: users ≔ ∅
-		@act-init-admins: admins ≔ {root_user ↦ root_password}
+	
+		@act-init-users: users ≔ {root_user}
+		@act-init-register: register ≔ {root_user}
+		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
+		@act-init-login: login ≔ ∅
+		@act-init-admins: admins ≔ {root_user}
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
-		@act-init-logged-out: logged_out ≔ ∅
-		@act-init-logged-in: logged_in ≔ ∅
+		
+//		/* REQ 6: The root user is the initial administrator. */
+//		@act-init-users: registered ≔ {root_user}
+//		@act-init-admins: admins ≔ {root_user}
+//		@act-init-account: account ≔ {root_user ↦ root_password}
+//		@act-init-logged-out: logged_out ≔ ∅
+//		@act-init-logged-in: logged_in ≔ ∅
 	end
-	
-event addAdmin
-any a p where
-@grd1: a ∈ USER
-@grd2: p ∈ PASSWORD
-then
-@act1: admins ≔ admins ∪ {a ↦ p}
-@act2: users ≔ users ∪ {a ↦ p}
 
-end
-
-	/* Register a new basic user
-	event RegisterUser
+	/* REQ 8: A client can register an account with the system directly. */
+	event RegisterClient
 	any
-		user
+		client
 		pass
 	where
-		@grd1: user ∈ USER
+		@grd1: client ∈ USER
 		@grd2: pass ∈ PASSWORD
-		@check-unregistered: user ∉ dom(register)
-		@check-nonzero-admin: card(admins) > 0
+		@check-unregistered: client ∉ register
 	then
-		@add-register: register ≔ register ∪ {user ↦ pass}
-		@add-users: users ≔ users ∪ {user ↦ pass}
+		@add-user: users ≔ users ∪ {client}
+		@add-register: register ≔ register ∪ {client}
+		@add-client: clients ≔ clients ∪ {client}
+		@add-account: accounts ≔ accounts ∪ {client ↦ pass}
 	end
 	
-	/* 
-	
-	/* Login a user
+	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
 	event LoginUser
 	any
 		user
 		pass 
 	where
-		@check-registered: user ∈ dom(register)
-		@check-password: pass = register(user)
-		@check-not-loggedin: user ∉ dom(login)
+		@check-registered: user ∈ register
+		@check-password: pass = accounts(user)
+		@check-not-loggedin: user ∉ login
 	then
-		@add-login: login ≔ login ∪ {user ↦ pass}
+		@add-login: login ≔ login ∪ {user}
 	end
-	*/
 	
-	/* Logout a user
+	/* REQ 3: A logged-in user can log out of the system. */
 	event LogoutUser
 	any
 		user
 		pass
 	where
-		@check-loggedin: user ∈ dom(login)
-		@check-password: pass = login(user)
+		@check-loggedin: user ∈ login
+		@check-password: pass = accounts(user)
 	then
-		@remove-login: login ≔ login ∖ {user ↦ pass}
+		@remove-login: login ≔ login ∖ {user}
 	end
-	*/
+	
+	/* REQ 9: A logged-in user can change their password. */
+	event ChangeUserPassword
+	any
+		user
+		old_pass
+		new_pass
+	where
+		@check-user: user ∈ register
+		@check-password: old_pass = accounts(user)
+		@new-password-type: new_pass ∈ PASSWORD
+		@check-loggedin: user ∈ login
+	then
+		/** Change the password for user everywhere */
+		@act3: accounts(user) ≔ new_pass
+	end
 end
 
