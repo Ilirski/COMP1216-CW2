@@ -8,4 +8,3 @@ constants
 axioms
 	@ROOT_USER: root_user ∈ USER
 	@ROOT_PASSWORD: root_password ∈ PASSWORD
-end
