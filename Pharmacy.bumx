@@ -1,4 +1,5 @@
-machine Pharmacy refines User
+machine Pharmacy 
+refines User
 sees PharmacyContext
 
 variables
@@ -27,7 +28,7 @@ invariants
 	@inv2: medicine ∈ BATCH_NUM ↔ MEDICINE_NAME
 	@inv3: medicine_count ∈ BATCH_NUM ↔ ℤ
 	@inv4: client_name ∈ NRIC ⇸ USER_NAME
-	@inv5: nric ∈ USER ↔ NRIC
+	@inv5: nric ∈ USER ⤔ NRIC
 	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
 	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
 	@inv8: last_medicine_date ∈ PRESCRIPTIONS ↔ DATE
@@ -62,7 +63,7 @@ then
 end
 
 
-event AddMedicne
+event AddMedicine
 any 
 	pharmacy
 	medicine_name
@@ -82,8 +83,43 @@ end
 event getPrescription
 any
 	 client
+//	 prescription
 	 result
 where
 	@grd1: client ∈ clients 
+	/* 
 	@grd2: result = prescriptions(nric(client))
+	*/
+//	@grd2: result = {client ↦ prescription}
+//	@grd3: prescription ∈ prescriptions(nric(client))
+	 @grd2: result =  ran({nric(client)} ◁ prescriptions)
 end
+
+event AddPrescription
+any 
+	client
+	prescription
+//	stf
+where
+	@grd1: client ∈ clients
+	@grd2: prescription ∈ PRESCRIPTIONS
+//	@grd3: stf ∈ staff ∧ stf ∈ login
+then 
+	@act1: prescriptions ≔ prescriptions ∪ {nric(client) ↦ prescription}
+end
+
+
+event LoginUser extends LoginUser
+end
+event LogoutUser extends LogoutUser 
+end
+event ChangeUserPassword extends ChangeUserPassword 
+end
+event RegisterClient extends  RegisterClient 
+end
+event RegisterAdmin extends RegisterAdmin 
+end
+event RegisterStaff extends RegisterStaff
+ end
+ 
+
