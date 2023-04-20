@@ -6,99 +6,46 @@ variables
 	register
 	login
 	
-//	logged_in
-//	logged_out
-	
+	/* Note: */
+	/* Not sure if I should have a set of users */
+	/* I think the system should track a set of unregistered users */
+	/* They are analogous to visitors to a website  */
+	/* But on the other hand, it's a bit tricky to model unregistered users */
+	/* Since there's not method that adds an unregistered user */
 	users
 	admins
 	staff
 	clients
 invariants
       
-    /* REQ 1: The system manages a set of registered users. */
-	/* However, some users may not have a password as they may not have an account */
-	/* e.g: client */
-	/* Therefore, we use a subset instead of strict subset here */
-	@inv-users-register: users ⊆ USER
+    /* Some users may use the system but are not registered */
+	@typeof-users: users ⊆ USER
 	
-	/* Registered users is a subset of users */
-	@inv-login-sub-login: register ⊆ USER
+	/* REQ 1: The system manages a set of registered users. */
+	@typeof-register: register ⊆ users
       
-    // Each user has exactly 1 PASSWORD
-	// A PASSWORD may be used by many users
-	@inv-account: accounts ∈ register → PASSWORD
+    // Every registered user must have exactly one password.
+    // The same password (or hash) can belong to one or many registered users.
+    // (1..*) -> (1) but for some reason no work
+	@typeof-account: accounts ∈ register → PASSWORD
     
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	/* REQ 5: A registered user can only have one role in the system */
-	@inv-user-role: partition(register, admins, staff, clients)
+	@typeof-user-roles: partition(register, admins, staff, clients)
 	
 	/* Logged in users is a subset of registered users */
-	@inv-login-sub-registered: login ⊆ register
-	
-	
-		
-
-//	/* Registered users can have the same passwords. A many to one relationship*/
-//    /* @inv-user-password: registered ∈ USER ⇸ PASSWORD */
-//    
-//	/* REQ 1: The system manages a set of registered users. */
-//	/* However, some users may not have a password as they may not have an account */
-//	/* e.g: client */
-//	/* Therefore, we use a subset instead of strict subset here */
-//	@inv-users-register: registered ⊆ USER
-//	
-//	/* REQ 4: There are three types of users: administrators, staff, and clients */
-//	/* REQ 5: A registered user can only have one role in the system */
-//	/* Clients, admins and staff are all part of the USER type*/
-//	@inv-user-role: partition(registered, admins, staff, clients)
-//	
-//	/* Users can either be logged in or logged out */
-//	@inv-user-login: partition(registered, logged_in, logged_out)
-//	
-//	/* Logged in users is a subset of registered users. Users are assumed to be registered */
-//	@inv-login-sub-registered: logged_in ⊆ registered
-//	
-//	/* Logged in users is a subset of registered users */
-//	/* @inv-login-sub-registered: login ⊆ register */s
-//	
-//	/* Should we use a total function here */
-//	/*Not sure what's the difference between above and below */
-//	/* @inv7: inv-user-account: registered ∈ registered → PASSWORD */
-//	@inv-user-account: account ∈ USER ⇸ PASSWORD
+	@typeof-login: login ⊆ register
 	
 event INITIALISATION
 	then
-	
 		@act-init-users: users ≔ {root_user}
-		@act-init-register: register ≔ {root_user}
-		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
-		@act-init-login: login ≔ ∅
 		@act-init-admins: admins ≔ {root_user}
 		@act-init-staff: staff ≔ ∅
 		@act-init-clients: clients ≔ ∅
-		
-//		/* REQ 6: The root user is the initial administrator. */
-//		@act-init-users: registered ≔ {root_user}
-//		@act-init-admins: admins ≔ {root_user}
-//		@act-init-account: account ≔ {root_user ↦ root_password}
-//		@act-init-logged-out: logged_out ≔ ∅
-//		@act-init-logged-in: logged_in ≔ ∅
-	end
-
-	/* REQ 8: A client can register an account with the system directly. */
-	event RegisterClient
-	any
-		client
-		pass
-	where
-		@grd1: client ∈ USER
-		@grd2: pass ∈ PASSWORD
-		@check-unregistered: client ∉ register
-	then
-		@add-user: users ≔ users ∪ {client}
-		@add-register: register ≔ register ∪ {client}
-		@add-client: clients ≔ clients ∪ {client}
-		@add-account: accounts ≔ accounts ∪ {client ↦ pass}
+//		@act-init-accounts: accounts(root_user) ≔ root_password
+		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
+		@act-init-register: register ≔ {root_user}
+		@act-init-login: login ≔ ∅
 	end
 	
 	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
@@ -108,7 +55,7 @@ event INITIALISATION
 		pass 
 	where
 		@check-registered: user ∈ register
-		@check-password: pass = accounts(user)
+		@check-password: accounts(user)= pass
 		@check-not-loggedin: user ∉ login
 	then
 		@add-login: login ≔ login ∪ {user}
@@ -128,18 +75,67 @@ event INITIALISATION
 	
 	/* REQ 9: A logged-in user can change their password. */
 	event ChangeUserPassword
-	any
-		user
-		old_pass
-		new_pass
-	where
-		@check-user: user ∈ register
-		@check-password: old_pass = accounts(user)
-		@new-password-type: new_pass ∈ PASSWORD
-		@check-loggedin: user ∈ login
-	then
-		/** Change the password for user everywhere */
-		@act3: accounts(user) ≔ new_pass
+		any
+			user
+			new_pass
+		where
+			@user-logged-in: user ∈ login
+			@new-pass: new_pass ∈ PASSWORD
+			@password-is-different: accounts(user) ≠ new_pass
+		then
+			@set-password: accounts(user) ≔ new_pass
 	end
-end
+	
+	/* REQ 8: A client can register an account with the system directly. */
+	event RegisterClient
+		any
+			user
+			pass
+		where
+			@user: user ∈ USER
+			@pass: pass ∈ PASSWORD
+			@check-unregistered: user ∉ register
+		then
+			@add-user: users ≔ users ∪ {user}
+			@add-register: register ≔ register ∪ {user}
+			@add-client: clients ≔ clients ∪ {user}
+			@set-password: accounts(user) ≔ pass
+	end
+	
+	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
+	event RegisterAdmin
+		any 
+			admin
+			user
+			pass
+		where
+			@admin-logged-in: admin ∈ admins ∩ login
+			@user: user ∈ USER // USER and not users
+			@not-registered: user ∉ register 
+			@pass: pass ∈ PASSWORD
+		then
+			@add-user: users ≔ users ∪ {user}
+			@add-register: register ≔ register ∪ {user}
+			@add-admin: admins ≔ admins ∪ {user}
+			@set-password: accounts(user) ≔ pass
+	end
+		
+	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
+	event RegisterStaff
+		any 
+			admin
+			user
+			pass
+		where
+			@admin-logged-in: admin ∈ admins ∩ login
+			@user: user ∈ USER // USER and not users
+			@not-registered: user ∉ register
+			@pass: pass ∈ PASSWORD
+		then
+			@add-user: users ≔ users ∪ {user}
+			@add-register: register ≔ register ∪ {user}
+			@add-staff: staff ≔ staff ∪ {user}
+			@set-password: accounts(user) ≔ pass
+	end
+end	
 
