@@ -83,15 +83,9 @@ end
 event getPrescription
 any
 	 client
-//	 prescription
 	 result
 where
 	@grd1: client ∈ clients 
-	/* 
-	@grd2: result = prescriptions(nric(client))
-	*/
-//	@grd2: result = {client ↦ prescription}
-//	@grd3: prescription ∈ prescriptions(nric(client))
 	 @grd2: result =  ran({nric(client)} ◁ prescriptions)
 end
 
@@ -99,11 +93,9 @@ event AddPrescription
 any 
 	client
 	prescription
-//	stf
 where
 	@grd1: client ∈ clients
-	@grd2: prescription ∈ PRESCRIPTIONS
-//	@grd3: stf ∈ staff ∧ stf ∈ login
+	@grd2: prescription ∈ PRESCRIPTIONS ∧ prescription ∉ ran(prescriptions)
 then 
 	@act1: prescriptions ≔ prescriptions ∪ {nric(client) ↦ prescription}
 end
@@ -115,8 +107,19 @@ event LogoutUser extends LogoutUser
 end
 event ChangeUserPassword extends ChangeUserPassword 
 end
+
 event RegisterClient extends  RegisterClient 
+any 
+	ic
+	client
+where 
+	@grd1: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@grd2: client ∈ USER
+	@grd3: client ∉ clients ∧ client ∉ admins ∧ client ∉ staff
+then 
+	@act1: nric ≔ nric ∪ {client ↦ ic}
 end
+
 event RegisterAdmin extends RegisterAdmin 
 end
 event RegisterStaff extends RegisterStaff
