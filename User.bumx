@@ -11,7 +11,6 @@ variables
 	clients
 invariants
       
-
 	/* REQ 1: The system manages a set of registered users. */
 	@typeof-registered: registered ⊆ USER
       
@@ -27,40 +26,41 @@ invariants
 	/* Logged in users is a subset of registered users */
 	@typeof-logged_in: logged_in ⊆ registered
 	
-event INITIALISATION
-	then
-		@act-init-admins: admins ≔ {root_user}
-		@act-init-staff: staff ≔ ∅
-		@act-init-clients: clients ≔ ∅
-//		@act-init-accounts: accounts(root_user) ≔ root_password
-		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
-		@act-init-registered: registered ≔ {root_user}
-		@act-init-logged_in: logged_in ≔ ∅
-	end
-	
-	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
+
+	event INITIALISATION
+		then
+			@act-init-admins: admins ≔ {root_user}
+			@act-init-staff: staff ≔ ∅
+			@act-init-clients: clients ≔ ∅
+	//		@act-init-accounts: accounts(root_user) ≔ root_password
+			@act-init-accounts: accounts ≔ {root_user ↦ root_password}
+			@act-init-registered: registered ≔ {root_user}
+			@act-init-logged-in: logged_in ≔ ∅
+		end
+		
+		/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
 	event LoginUser
-	any
-		user
-		pass 
-	where
-		@check-registered: user ∈ registered
-		@check-password: accounts(user)= pass
-		@check-not-logged-in: user ∉ logged_in
-	then
-		@add-logged-in: logged_in ≔ logged_in ∪ {user}
+		any
+			user
+			pass 
+		where
+			@check-registered: user ∈ registered
+			@check-password: accounts(user) = pass
+			@check-not-logged-in: user ∉ logged_in
+		then
+			@login: logged_in ≔ logged_in ∪ {user}
 	end
 	
 	/* REQ 3: A logged-in user can log out of the system. */
 	event LogoutUser
-	any
-		user
-		pass
-	where
-		@check-logged-in: user ∈ logged_in
-		@check-password: pass = accounts(user)
-	then
-		@remove-logged-in: logged_in ≔ logged_in ∖ {user}
+		any
+			user
+			pass
+		where
+			@check-logged-in: user ∈ logged_in
+			@check-password: pass = accounts(user)
+		then
+			@log-out: logged_in ≔ logged_in ∖ {user}
 	end
 	
 	/* REQ 9: A logged-in user can change their password. */
@@ -69,7 +69,7 @@ event INITIALISATION
 			user
 			new_pass
 		where
-			@user-logged-in: user ∈ logged_in
+			@check-logged-in: user ∈ logged_in
 			@new-pass: new_pass ∈ PASSWORD
 			@password-is-different: accounts(user) ≠ new_pass
 		then
@@ -99,7 +99,7 @@ event INITIALISATION
 			pass
 		where
 			@admin-logged-in: admin ∈ admins ∩ logged_in
-			@user: user ∈ USER // USER and not users
+			@user: user ∈ USER
 			@not-registered: user ∉ registered 
 			@pass: pass ∈ PASSWORD
 		then
@@ -116,12 +116,12 @@ event INITIALISATION
 			pass
 		where
 			@admin-logged-in: admin ∈ admins ∩ logged_in
-			@user: user ∈ USER // USER and not users
+			@user: user ∈ USER
 			@not-registered: user ∉ registered
 			@pass: pass ∈ PASSWORD
 		then
 			@add-user: registered ≔ registered ∪ {user}
 			@add-staff: staff ≔ staff ∪ {user}
 			@set-password: accounts(user) ≔ pass
+		end	
 	end
-end	
