@@ -1,0 +1,10 @@
+context PharmacyContext extends UserContext
+sets
+	PHARMACIES
+	MEDICINE_NAME
+	BATCH_NUM
+	USER_NAME
+	NRIC
+	PRESCRIPTIONS
+	DATE
+end
