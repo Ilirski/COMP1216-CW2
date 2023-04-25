@@ -6,11 +6,14 @@ sets
 constants
 	root_user
 	root_password
-	Client
-	Staff
-	Admin
+	CLIENT
+	STAFF
+	ADMIN
+	NO_USER
 axioms
+	@NO_USER: NO_USER ∈ USER
 	@ROOT_USER: root_user ∈ USER
+	@NO_USER-ROOT_USER: root_user ≠ NO_USER
 	@ROOT_PASSWORD: root_password ∈ PASSWORD
-	@roles: partition(ROLE, {Client}, {Staff}, {Admin})
+	@roles: partition(ROLE, {CLIENT}, {STAFF}, {ADMIN})
 end
