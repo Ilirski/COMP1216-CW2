@@ -6,118 +6,113 @@ variables
 	registered
 	current_user
 	relations
+	
+	optional_user
 invariants
       
 	/* REQ 1: The system manages a set of registered users. */
 	@typeof-registered: registered ⊆ USER
       
     // Every registered user must have exactly one password.
-    // The same password (or hash) can belong to one or many registered users.
-    // (1..*) -> (1) but for some reason no work
+    // The same password can belong to zero or many registered users.
 	@typeof-account: accounts ∈ registered → PASSWORD
     
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	/* REQ 5: A registered user can only have one role in the system */
 	@type-of-role: relations ∈ registered → ROLE
 	
+	/* Hello */
+	@inv1: optional_user ⊆ registered
+	@inv2: card(optional_user) ≤ 1
+	
 	/* Logged in users is a subset of registered users */
-	@typeof-current-user: current_user ∈ registered
+	@typeof-current-user: current_user ∈ registered ∪ {NO_USER}
 	
-	
-//	@type-of-admin:∀ c · c ∈ registered_users ∧ relations(c) = OPERATOR ⇒ relations(c) ≠ SUPERVISOR
-//	@type-of-staff:∀ c · c ∈ registered_users ∧ relations(c) = OPERATOR ⇒ relations(c) ≠ SUPERVISOR
-//	@type-of-client:∀ c · c ∈ registered_users ∧ relations(c) = OPERATOR ⇒ relations(c) ≠ SUPERVISOR
-	
-
 	event INITIALISATION
 	then
 		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
 		@act-init-registered: registered ≔ {root_user}
-		@act-init-relations: relations ≔ {root_user ↦ Admin}
-		@act-init-current-user: current_user :∈ ∅
+		@act-init-relations: relations ≔ {root_user ↦ ADMIN}
+		@act-init-current-user: current_user ≔ NO_USER
+		
+		@act-init-optional-user: optional_user ≔ ∅
 	end
 	
 	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
-	event LoginUser
+	event Login
 	any
 		user
 		pass 
 	where
 		@check-registered: user ∈ registered
-		@check-password: accounts(user)= pass
-		@check-not-logged-in: current_user ∈ ∅
+		@check-password: accounts(user) = pass
+		
+		@check-optional: optional_user = ∅
+//		@check-not-logged-in: current_user = NO_USER
 	then
-		@login: current_user ≔ user
+//		@login: current_user ≔ user
+		@login: optional_user ≔ {user}
 	end
 	
 	/* REQ 3: A logged-in user can log out of the system. */
-	event LogoutUser
-		any
-			user
-			pass
+	event Logout
 		where
-			@check-logged-in: current_user ∉ ∅
-			@check-password: pass = accounts(user)
+			@check-registered: current_user ∈ registered
+			@check-logged-in: current_user ≠ NO_USER
 		then
-			@log-out: current_user :∈ ∅
+			@log-out: current_user ≔ NO_USER
 	end
 	
 	/* REQ 9: A logged-in user can change their password. */
 	event ChangeUserPassword
 		any
-			user
 			new_pass
 		where
-			@check-logged-in: current_user ∉ ∅
+			@check-logged-in: current_user ≠ NO_USER
 			@new-pass: new_pass ∈ PASSWORD
-			@password-is-different: accounts(user) ≠ new_pass
+			@password-is-different: accounts(current_user) ≠ new_pass
 		then
-			@set-password: accounts(user) ≔ new_pass
+			@set-password: accounts(current_user) ≔ new_pass
 	end
 	
 	/* REQ 8: A client can registered an account with the system directly. */
-	event registerClient
+	event RegisterAsClient
 		any
 			user
 			pass
 		where
-			@user: user ∈ USER
+			@user-registered: user ∈ USER ∧ user ∉ registered ∧ user ≠ NO_USER
 			@pass: pass ∈ PASSWORD
-			@check-unregistered: user ∉ registered
 		then
 			@add-user: registered ≔ registered ∪ {user}
-			@assign-client: relations ≔ relations ∪ {user ↦ Client}
+			@assign-client: relations ≔ relations ∪ {user ↦ CLIENT}
 			@set-password: accounts(user) ≔ pass
 	end
 	
 	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
-	event RegisterAdmin
+	event RegisterAsAdmin
 		any 
 			user
+			role
 			pass
 		where
-			@admin-logged-in: current_user ↦ Admin ∈ relations ∪ {user ↦ Admin}
-			@user: user ∈ USER
-			@not-registered: user ∉ registered 
+//			@admin-logged-in: current_user ↦ ADMIN ∈ relations ∪ {user ↦ role} 
+			@role: role ∈ ROLE
+			@user-registered: user ∈ USER ∧ user ∉ registered
+			@not-null: user ≠ NO_USER
 			@pass: pass ∈ PASSWORD
+			@grd5: (relations ∪ {user ↦ role}) ∈ ((registered ∪ {user}) → ROLE) 
+			
+			/* Use set comprehension if using optional? */
+//			@admin-logged-in: role ∈ ROLE ∩ (∃ rel· rel ∈ relations ∧ rel = user ↦ role)
+						
+			/* TODO: Clean up below */ 
+//			@grd7: relations(current_user) = ADMIN
+//			@grd7: current_user ↦ ADMIN ∈ relations ∪ {user ↦ role} 
+//			@grd7: current_user ≠ ∅ ⇒ relations(current_user) = ADMIN
+//			@grd8: relations ∈ (registered ∪ {user}) → ROLE
 		then
 			@add-user: registered ≔ registered ∪ {user}
-			@assign-staff: relations ≔ relations ∪ {user ↦ Admin}
+			@assign-staff: relations ≔ relations ∪ {user ↦ role}
 			@set-password: accounts(user) ≔ pass
 	end
-		
-	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
-	event RegisterStaff
-		any 
-			user
-			pass
-		where
-			@staff-logged-in: current_user ↦ Staff ∈ relations ∪ {user ↦ Staff}
-			@user: user ∈ USER
-			@not-registered: user ∉ registered
-			@pass: pass ∈ PASSWORD
-		then
-			@add-user: registered ≔ registered ∪ {user}
-			@assign-staff: relations ≔ relations ∪ {user ↦ Staff}
-			@set-password: accounts(user) ≔ pass
-	end	
