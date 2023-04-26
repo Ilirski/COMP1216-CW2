@@ -1,3 +1,94 @@
-machine Booking event INITIALISATION
-	end
+//machine Booking event INITIALISATION
+//	end
 
+machine Booking refines Pharmacy
+sees BookingContext
+
+variables
+	accounts
+	register
+	login
+	users
+	admins
+	staff
+	clients
+	
+	pharmacies
+	medicine
+	medicine_count
+	client_name
+	nric
+	prescriptions
+	medicine_info
+	last_medicine_date
+	pharmacy_stock
+	appointment_num
+	
+invariants
+
+//event INITIALISATION extends INITIALISATION
+//then
+//	@act1:
+//	
+//end
+//
+//	event BookingAppointment
+//	any
+//	where
+//	then
+//	end
+//	
+//	event RejectAppointment
+//	any
+//	where
+//	then
+//	end
+//	
+//	event AcceptAppointment
+//	any
+//	where
+//	then
+//	end
+//
+// 	event AbandonAppointment
+//	any
+//	where
+//	then
+//	end
+//	
+//	event AbandonSystem
+//	any
+//	where
+//	then
+//	end
+//
+//	event ViewAppointment
+//	any
+//	where
+//	then
+//	end
+//
+//	event RebookAppointment
+//	any
+//	where
+//	then
+//	end
+
+
+//event LoginUser extends LoginUser
+//end
+//event LogoutUser extends LogoutUser 
+//end
+//event ChangeUserPassword extends ChangeUserPassword 
+//end
+//event RegisterClient extends  RegisterClient 
+//end
+//event RegisterAdmin extends RegisterAdmin 
+//end
+//event RegisterStaff extends RegisterStaff
+//end
+//event AddMedicine extends AddMedicine
+//end
+//event AddPharmacy extends AddPharmacy
+//end
+//end
