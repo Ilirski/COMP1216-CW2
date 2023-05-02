@@ -2,140 +2,102 @@ machine User
 sees UserContext
 
 variables
-	accounts
-	register
-	login
-	
-	/* Note: */
-	/* Not sure if I should have a set of users */
-	/* I think the system should track a set of unregistered users */
-	/* They are analogous to visitors to a website  */
-	/* But on the other hand, it's a bit tricky to model unregistered users */
-	/* Since there's not method that adds an unregistered user */
-	users
-	admins
-	staff
-	clients
+	password
+	registered
+	current_user
+	role
 invariants
       
     /* Some users may use the system but are not registered */
 	@typeof-users: users ⊆ USER
 	
 	/* REQ 1: The system manages a set of registered users. */
-	@typeof-register: register ⊆ users
+	@typeof-registered: registered ⊆ USER ∖ {no_user}
       
     // Every registered user must have exactly one password.
-    // The same password (or hash) can belong to one or many registered users.
-    // (1..*) -> (1) but for some reason no work
-	@typeof-account: accounts ∈ register → PASSWORD
+    // The same password can belong to zero or many registered users.
+	@typeof-password: password ∈ registered → PASSWORD
     
 	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	/* REQ 5: A registered user can only have one role in the system */
-	@typeof-user-roles: partition(register, admins, staff, clients)
+	@type-of-role: role ∈ registered → ROLE
 	
-	/* Logged in users is a subset of registered users */
-	@typeof-login: login ⊆ register
+	/* Current user is either registered or not logged in */
+	@typeof-current-user: current_user ∈ registered ∪ {no_user}
 	
-event INITIALISATION
+	event INITIALISATION
 	then
-		@act-init-users: users ≔ {root_user}
-		@act-init-admins: admins ≔ {root_user}
-		@act-init-staff: staff ≔ ∅
-		@act-init-clients: clients ≔ ∅
-//		@act-init-accounts: accounts(root_user) ≔ root_password
-		@act-init-accounts: accounts ≔ {root_user ↦ root_password}
-		@act-init-register: register ≔ {root_user}
-		@act-init-login: login ≔ ∅
+		@act-init-password: password ≔ {root_user ↦ root_password}
+		@act-init-registered: registered ≔ {root_user}
+		@act-init-role: role ≔ {root_user ↦ Admin}
+		@act-init-current-user: current_user ≔ no_user
 	end
 	
 	/* REQ 2: The system should only allow a user to log in to the system using the correct password. */
-	event LoginUser
+	event Login
 	any
 		user
 		pass 
 	where
-		@check-registered: user ∈ register
-		@check-password: accounts(user)= pass
-		@check-not-loggedin: user ∉ login
+		@check-registered: user ∈ registered
+		@check-password: password(user) = pass
+		@check-not-logged-in: current_user = no_user
 	then
-		@add-login: login ≔ login ∪ {user}
+		@login: current_user ≔ user
 	end
 	
 	/* REQ 3: A logged-in user can log out of the system. */
-	event LogoutUser
-	any
-		user
-		pass
-	where
-		@check-loggedin: user ∈ login
-		@check-password: pass = accounts(user)
-	then
-		@remove-login: login ≔ login ∖ {user}
+	event Logout
+		where
+			@check-registered: current_user ∈ registered
+			@check-logged-in: current_user ≠ no_user
+		then
+			@log-out: current_user ≔ no_user
 	end
 	
 	/* REQ 9: A logged-in user can change their password. */
 	event ChangeUserPassword
 		any
-			user
 			new_pass
 		where
-			@user-logged-in: user ∈ login
+			@check-logged-in: current_user ≠ no_user
 			@new-pass: new_pass ∈ PASSWORD
-			@password-is-different: accounts(user) ≠ new_pass
+			@password-is-different: password(current_user) ≠ new_pass
 		then
-			@set-password: accounts(user) ≔ new_pass
+			@set-password: password(current_user) ≔ new_pass
 	end
 	
-	/* REQ 8: A client can register an account with the system directly. */
-	event RegisterClient
+	/* REQ 8: A client can registered an account with the system directly. */
+	event RegisterAsClient
 		any
-			user
-			pass
+			new_user
+			new_pass
 		where
-			@user: user ∈ USER
-			@pass: pass ∈ PASSWORD
-			@check-unregistered: user ∉ register
+			@new-user-not-registered: new_user ∈ USER ∧ new_user ∉ registered 
+			@new-user-not-null: new_user ≠ no_user
+			@is-not-logged-in: current_user = no_user
+			@pass: new_pass ∈ PASSWORD
 		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
-			@add-client: clients ≔ clients ∪ {user}
-			@set-password: accounts(user) ≔ pass
+			@register-user: registered ≔ registered ∪ {new_user}
+			@assign-client: role ≔ role ∪ {new_user ↦ Client}
+			@set-password: password(new_user) ≔ new_pass
 	end
 	
-	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
-	event RegisterAdmin
+	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
+	event RegisterAsAdmin
 		any 
-			admin
-			user
+			new_user
+			new_role
 			pass
 		where
-			@admin-logged-in: admin ∈ admins ∩ login
-			@user: user ∈ USER // USER and not users
-			@not-registered: user ∉ register 
+			@new-user-not-registered: new_user ∈ USER ∧ new_user ∉ registered
+			@new-user-not-null: new_user ≠ no_user
+			@admin-or-staff: new_role ∈ {Admin, Staff}
 			@pass: pass ∈ PASSWORD
+//			@is-admit: role(current_user) = Admit
+			@is-admin: current_user ↦ Admin ∈ role ∪ {new_user ↦ Admin}
 		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
-			@add-admin: admins ≔ admins ∪ {user}
-			@set-password: accounts(user) ≔ pass
+			@register-user: registered ≔ registered ∪ {new_user}
+			@assign-role: role ≔ role ∪ {new_user ↦ new_role}
+			@set-password: password(new_user) ≔ pass
 	end
-		
-	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
-	event RegisterStaff
-		any 
-			admin
-			user
-			pass
-		where
-			@admin-logged-in: admin ∈ admins ∩ login
-			@user: user ∈ USER // USER and not users
-			@not-registered: user ∉ register
-			@pass: pass ∈ PASSWORD
-		then
-			@add-user: users ≔ users ∪ {user}
-			@add-register: register ≔ register ∪ {user}
-			@add-staff: staff ≔ staff ∪ {user}
-			@set-password: accounts(user) ≔ pass
-	end
-end	
-
