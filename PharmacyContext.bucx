@@ -1,4 +1,5 @@
-context PharmacyContext extends UserContext
+context PharmacyContext 
+extends UserContext
 sets
 	PHARMACIES
 	MEDICINE_NAME

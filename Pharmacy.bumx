@@ -1,5 +1,5 @@
 machine Pharmacy 
-refines User
+refines User 
 sees PharmacyContext
 
 variables

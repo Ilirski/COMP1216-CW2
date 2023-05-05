@@ -1,7 +1,5 @@
-//machine Booking event INITIALISATION
-//	end
-
-machine Booking refines Pharmacy
+machine Booking 
+refines Pharmacy
 sees BookingContext
 
 variables
