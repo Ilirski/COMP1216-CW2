@@ -2,12 +2,10 @@ machine Pharmacy refines User
 sees PharmacyContext
 
 variables
-	accounts
+	password
 	registered
-	logged_in
-	admins
-	staff
-	clients
+	current_user
+	role
 	
 	pharmacies
 	medicine
@@ -23,15 +21,15 @@ variables
 	
 invariants
 	@inv1: pharmacies ∈ USER ↔ PHARMACIES
-	@inv2: medicine ∈ BATCH_NUM ↔ MEDICINE_NAME
-	@inv3: medicine_count ∈ BATCH_NUM ↔ ℤ
+	@inv2: medicine ∈ BATCH_NUM ⇸ MEDICINE_NAME
+	@inv3: medicine_count ∈ BATCH_NUM ↔ ℕ
 	@inv4: client_name ∈ NRIC ⇸ USER_NAME
 	@inv5: nric ∈ USER ⤔ NRIC
 	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
 	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
 	@inv8: last_medicine_date ∈ PRESCRIPTIONS ↔ DATE
 	@inv9: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
-	@inv10: appointment_num ∈ PHARMACIES ↔ ℤ
+	@inv10: appointment_num ∈ PHARMACIES ⇸ ℕ1
 
 
 event INITIALISATION extends INITIALISATION
@@ -53,25 +51,30 @@ event AddPharmacy
 any 
 	pharmacy
 	admin
+	apt_num
 where
 	@grd1: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
-	@grd3: admin ∈ admins
+	@grd2: role(admin) = Admin
+	@grd3: apt_num ∈ ℕ1
 then 
-	@act1: pharmacies ≔ {admin ↦ pharmacy}
+	@act1: pharmacies ≔ pharmacies ∪ {admin ↦ pharmacy}
+	@grd2: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
 end
 
 
 event AddMedicine
 any 
+	admin
 	pharmacy
 	medicine_name
 	batch
 	count
 where 
-	@grd1: pharmacy ∈ ran(pharmacies)
-	@grd2: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
-	@grd3: medicine_name ∈ MEDICINE_NAME
-	@grd4: count ∈ ℤ
+	@grd1: role(admin) = Admin
+	@grd2: pharmacy ∈ pharmacies(admin)
+	@grd3: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
+	@grd4: medicine_name ∈ MEDICINE_NAME
+	@grd5: count ∈ ℕ1
 then
 	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
 	@act2: medicine ≔ medicine ∪ {batch ↦ medicine_name}
@@ -83,8 +86,8 @@ any
 	 client
 	 result
 where
-	@grd1: client ∈ clients 
-	 @grd2: result =  ran({nric(client)} ◁ prescriptions)
+	@grd1: role(client) = Client
+	@grd2: result =  ran({nric(client)} ◁ prescriptions)
 end
 
 event AddPrescription
@@ -92,35 +95,50 @@ any
 	client
 	prescription
 where
-	@grd1: client ∈ clients
+	@grd1: client ∈ Clients
 	@grd2: prescription ∈ PRESCRIPTIONS ∧ prescription ∉ ran(prescriptions)
 then 
 	@act1: prescriptions ≔ prescriptions ∪ {nric(client) ↦ prescription}
 end
 
+event updateAptNum
+any 
+	admin
+	pharmacy
+	apt_num
+where
+	@grd1: role(admin) = Admin
+	@grd2: pharmacy ∈ pharmacies(admin)
+	@grd3: apt_num ∈ ℕ1
+then
+	@act1: appointment_num(pharmacy) ≔ apt_num 
+end 
 
-event LoginUser extends LoginUser
+event getClientName
+any 
+	user
+	ic
+	result
+where 
+	@grd1: role(user) = Admin ∨ role(user) = Staff
+	@grd2: ic ∈ ran(nric)
+	@grd3: result = client_name(ic)
+end	
+
+
+event Login extends Login
 end
-event LogoutUser extends LogoutUser 
-end
-event ChangeUserPassword extends ChangeUserPassword 
+event Logout extends Logout
 end
 
-event registerClient extends  registerClient 
+event RegisterAsClient extends  RegisterAsClient 
 any 
 	ic
-	client
 where 
 	@grd1: ic ∈ NRIC ∧ ic ∉ ran(nric)
-	@grd2: client ∈ USER
-	@grd3: client ∉ clients ∧ client ∉ admins ∧ client ∉ staff
 then 
-	@act1: nric ≔ nric ∪ {client ↦ ic}
+	@act1: nric ≔ nric ∪ {new_user ↦ ic}
 end
 
-event RegisterAdmin extends RegisterAdmin 
+event RegisterAsAdmin extends RegisterAsAdmin
 end
-event RegisterStaff extends RegisterStaff
- end
- 
-
