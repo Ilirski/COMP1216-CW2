@@ -11,19 +11,19 @@ invariants
 	/* REQ 1: The system manages a set of registered users. */
 	@typeof-registered: registered ⊆ USER ∖ {no_user}
       
-    // Every registered user must have exactly one password.
-    // The same password can belong to zero or many registered users.
+    /* Every registered user must have exactly one password. */
+    /* The same password can belong to zero or many registered users. */
 	@typeof-password: password ∈ registered → PASSWORD
     
-	/* REQ 4: There are three types of users: administrators, staff, and clients */
-	/* REQ 5: A registered user can only have one role in the system */
+	/* REQ 5: A user can only have one role in the system. */
 	@typeof-role: role ∈ registered → ROLE
 	
-	/* Current user is either registered or not logged in */
+	/* The current user must be registered or not logged in (no user) */
 	@typeof-current-user: current_user ∈ registered ∪ {no_user}
 	
 	event INITIALISATION
 	then
+		/* REQ 6: The root user is the initial administrator. */
 		@act-init-password: password ≔ {root_user ↦ root_password}
 		@act-init-registered: registered ≔ {root_user}
 		@act-init-role: role ≔ {root_user ↦ Admin}
@@ -64,8 +64,8 @@ invariants
 			@set-password: password(current_user) ≔ new_pass
 	end
 	
-	/* REQ 8: A client can registered an account with the system directly. */
-	event RegisterAsClient
+	/* REQ 8: A client can register an account with the system directly. */
+	event RegisterClient
 		any
 			new_user
 			new_pass
@@ -73,27 +73,27 @@ invariants
 			@new-user-not-registered: new_user ∈ USER ∧ new_user ∉ registered 
 			@new-user-not-null: new_user ≠ no_user
 			@is-not-logged-in: current_user = no_user
-			@pass: new_pass ∈ PASSWORD
+			@typeof-pass: new_pass ∈ PASSWORD
 		then
 			@register-user: registered ≔ registered ∪ {new_user}
 			@assign-client: role ≔ role ∪ {new_user ↦ Client}
-			@set-password: password(new_user) ≔ new_pass
+			@set-pass: password(new_user) ≔ new_pass
 	end
 	
-	/* REQ 7: A logged-in administrator can registered a new user for the role of administrator or staff. */
-	event RegisterAsAdmin
+	/* REQ 7: A logged-in administrator can register a new user for the role of administrator or staff. */
+	event RegisterAdminOrStaff
 		any 
 			new_user
 			new_role
-			pass
+			new_pass
 		where
 			@new-user-not-registered: new_user ∈ USER ∧ new_user ∉ registered
 			@new-user-not-null: new_user ≠ no_user
-			@admin-or-staff: new_role ∈ {Admin, Staff}
-			@pass: pass ∈ PASSWORD
+			@new-role-admin-or-staff: new_role ∈ {Admin, Staff}
+			@typeof-pass: new_pass ∈ PASSWORD
 			@is-admin: current_user ↦ Admin ∈ role ∪ {new_user ↦ Admin}
 		then
 			@register-user: registered ≔ registered ∪ {new_user}
 			@assign-role: role ≔ role ∪ {new_user ↦ new_role}
-			@set-password: password(new_user) ≔ pass
+			@set-pass: password(new_user) ≔ new_pass
 	end

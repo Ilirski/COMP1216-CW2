@@ -11,9 +11,10 @@ constants
 	Staff
 	Admin
 axioms
-	@no-user-is-user: no_user ∈ USER
-	@root-user-is-user: root_user ∈ USER
-	@root-not-null: root_user ≠ no_user
-	@ROOT_PASSWORD: root_password ∈ PASSWORD
+	@typeof-no-user: no_user ∈ USER
+	@typeof-root-user: root_user ∈ USER
+	@root-user-not-null: root_user ≠ no_user
+	@typeof-root-password: root_password ∈ PASSWORD
+	/* REQ 4: There are three types of users: administrators, staff, and clients */
 	@roles: partition(ROLE, {Client}, {Staff}, {Admin})
 end
