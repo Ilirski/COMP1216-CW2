@@ -1689,4 +1689,5 @@
         <org.eventb.core.prReas name="r2" org.eventb.core.prRID="org.eventb.core.seqprover.autoRewritesL4:0"/>
         <org.eventb.core.prReas name="r3" org.eventb.core.prRID="org.eventb.core.seqprover.typeRewrites:1"/>
     </org.eventb.core.prProof>
+    <org.eventb.core.prProof name="RegisterAsAdmin/set-pass/SIM"/>
 </org.eventb.core.prFile>
