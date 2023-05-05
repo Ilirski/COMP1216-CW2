@@ -1,4 +1,4 @@
-machine User 
+machine User
 sees UserContext
 
 variables
@@ -8,9 +8,6 @@ variables
 	role
 invariants
       
-    /* Some users may use the system but are not registered */
-	@typeof-users: users ⊆ USER
-	
 	/* REQ 1: The system manages a set of registered users. */
 	@typeof-registered: registered ⊆ USER ∖ {no_user}
       
