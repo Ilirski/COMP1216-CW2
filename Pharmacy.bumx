@@ -93,6 +93,7 @@ where
 	@grd3: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
 	@grd4: medicine_name ∈ MEDICINE_NAME
 	@grd5: qty ∈ ℕ1
+	@not-null: current_user ≠ no_user
 //	@grd7: pharmacy ∈ ran(pharmacies)
 then
 	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
@@ -106,6 +107,7 @@ any
 	 result
 where
 	@grd1: current_user ∈ registered ∧ role(current_user) = Client
+	@not-null: current_user ≠ no_user
 	@grd2: result =  ran({nric(current_user)} ◁ prescriptions)
 end
 
@@ -117,6 +119,7 @@ any
 	apt_num
 where
 	@grd1: role(current_user) = Admin
+	@not-null: current_user ≠ no_user
 	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@grd3: apt_num ∈ ℕ1
 then
@@ -132,6 +135,7 @@ any
 where 
 	@grd1: user ∈ registered 
 	@grd2: role(current_user) ∈ {Admin, Staff}
+	@not-null: current_user ≠ no_user
 	@grd3: ic ∈ ran(nric)
 	@grd4: result = client_name(ic)
 end	
@@ -142,7 +146,7 @@ end
 event Logout extends Logout
 end
 
-event CHnageUserPassword extends ChangeUserPassword
+event ChanageUserPassword extends ChangeUserPassword
 end
 event RegisterClient extends  RegisterClient 
 any 
