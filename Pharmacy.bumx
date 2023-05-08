@@ -88,10 +88,9 @@ any
 	 client
 	 result
 where
-	@grd1: role(client) = Client
+	@grd1: client ∈ registered ∧ role(client) = Client
 	@grd2: result =  ran({nric(client)} ◁ prescriptions)
 end
-
 
 event updateAptNum
 any 
@@ -113,14 +112,15 @@ any
 	ic
 	result
 where 
-	@grd1: role(user) = Admin ∨ role(user) = Staff
-	@grd2: ic ∈ ran(nric)
-	@grd3: result = client_name(ic)
+	@grd1: user ∈ registered 
+	@grd2: role(user) = Admin ∨ role(user) = Staff
+	@grd3: ic ∈ ran(nric)
+	@grd4: result = client_name(ic)
 end	
-
 
 event Login extends Login
 end
+
 event Logout extends Logout
 end
 
