@@ -146,7 +146,7 @@ end
 event Logout extends Logout
 end
 
-event ChanageUserPassword extends ChangeUserPassword
+event ChangeUserPassword extends ChangeUserPassword
 end
 event RegisterClient extends  RegisterClient 
 any 
