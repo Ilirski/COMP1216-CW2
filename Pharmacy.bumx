@@ -72,7 +72,6 @@ any
 	apt_num
 where
 	@grd1: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
-	@grd4: current_user ≠ no_user
 	@grd2: role(current_user) = Admin
 	@grd3: apt_num ∈ ℕ1
 then 
@@ -142,7 +141,7 @@ end
 event Logout extends Logout
 end
 
-event CHnageUserPassword extends ChangeUserPassword
+event ChangeUserPassword extends ChangeUserPassword
 end
 event RegisterClient extends  RegisterClient 
 any 
