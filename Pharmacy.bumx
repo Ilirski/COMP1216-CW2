@@ -87,14 +87,13 @@ any
 	medicine_name
 	batch
 	qty
-where 
-	@grd1: role(current_user) = Admin
+where
+	@is-admin: current_user ↦ Admin ∈ role ∪ {current_user ↦ Admin}
 	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@grd3: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
 	@grd4: medicine_name ∈ MEDICINE_NAME
 	@grd5: qty ∈ ℕ1
 	@not-null: current_user ≠ no_user
-//	@grd7: pharmacy ∈ ran(pharmacies)
 then
 	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
 	@act2: medicine ≔ medicine ∪ {batch ↦ medicine_name}
@@ -118,7 +117,7 @@ any
 	pharmacy
 	apt_num
 where
-	@grd1: role(current_user) = Admin
+	@is-admin: current_user ↦ Admin ∈ role ∪ {current_user ↦ Admin}
 	@not-null: current_user ≠ no_user
 	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@grd3: apt_num ∈ ℕ1
@@ -126,15 +125,16 @@ then
 	@act1: appointment_num(pharmacy) ≔ apt_num 
 end 
 
-/* REQ 18:  An administrator or a staff can view the client’s details using their NRIC (MyKad) number. */
+/* REQ 18:  An administrator or a staff can view the client’s details using their 
+ * NRIC (MyKad) number. */
 event getClientName
 any 
 	user
 	ic
 	result
 where 
-	@grd1: user ∈ registered 
-	@grd2: role(current_user) ∈ {Admin, Staff}
+	@grd1: user ∈ registered
+	@is-not-admin-or-staff: current_user ↦ Client ∉ role ∪ {current_user ↦ Client}
 	@not-null: current_user ≠ no_user
 	@grd3: ic ∈ ran(nric)
 	@grd4: result = client_name(ic)
@@ -148,6 +148,8 @@ end
 
 event ChangeUserPassword extends ChangeUserPassword
 end
+
+/*Extension: Client registration includes NRIC*/
 event RegisterClient extends  RegisterClient 
 any 
 	ic
