@@ -22,50 +22,48 @@ variables
 	
 invariants
 	 /* An admin can register multiple pharmacies */
-	@inv1: pharmacies ∈ USER ↔ PHARMACIES
+	@typeof-pharmacies: pharmacies ∈ USER ↔ PHARMACIES
 	
 	 /* REQ 10 : */
 	 /* Each packet of medicine has a batch number*/
 	 /* Each batch number will link to a medicine name*/
-	@inv2: medicine ∈ BATCH_NUM ⇸ MEDICINE_NAME
+	@typeof-medicine: medicine ∈ BATCH_NUM ⇸ MEDICINE_NAME
 	
 	 /* Each batch of medicine will has its own quantity of stock */
 	 /* The stock only can be one integer number [0, ∞) */
-	@inv3: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+	@typeof-medicineqty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
 	
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
-	@inv4: client_name ∈ NRIC ⇸ USER_NAME
-	@inv5: nric ∈ USER ⤔ NRIC
-//	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
+	@typeof-nric: nric ∈ USER ⤔ NRIC
+	@typeof-prescriptions-list: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
 	/* Prescription also includes last received medicine date */
-//	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
-//	@inv8: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
+	@prescription-medicine-info: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+	@prescription-last-medicine-date: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
 	
 	/* REQ 14: A pharmacy has a medicine stock specifying the availability of medicines. */
-	@inv9: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
+	@typeof-pharmacy-stock: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
 	
 	/* REQ 16: A pharmacy has a daily number of appointments. */
-	@inv10: appointment_num ∈ PHARMACIES ⇸ ℕ1
+	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
 
 
 event INITIALISATION extends INITIALISATION
 then
-	@act1: pharmacies ≔ ∅
-	@act2: medicine ≔ ∅
-	@act3: medicine_qty ≔ ∅ 
-	@act4: client_name ≔ ∅
-	@act5: nric ≔ ∅
-//	@act6: prescriptions ≔ ∅
-//	@act7: medicine_info ≔ ∅
-//	@act8: last_medicine_date ≔ ∅ 
-	@act9: pharmacy_stock ≔ ∅
-	@act10: appointment_num ≔ ∅
+	@act-init-pharmacies: pharmacies ≔ ∅
+	@act-init-medicine: medicine ≔ ∅
+	@act-init-medicine-qty: medicine_qty ≔ ∅ 
+	@act-init-client-name: client_name ≔ ∅
+	@act-init-nric: nric ≔ ∅
+	@act-prescriptions: prescriptions ≔ ∅
+	@act-medicine-info: medicine_info ≔ ∅
+	@act-last-medicine-date: last_medicine_date ≔ ∅ 
+	@act-pharmacy-stock: pharmacy_stock ≔ ∅
+	@act-daily-appointment-num: appointment_num ≔ ∅
 end
-
-
 
 /* Only the admin can register a new pharmacy */
 event AddPharmacy
@@ -73,16 +71,14 @@ any
 	pharmacy
 	apt_num
 where
-	@grd1: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
-	@grd4: current_user ≠ no_user
-	@grd2: role(current_user) = Admin
-	@grd3: apt_num ∈ ℕ1
+	@does-pharmacy-exist: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
+	@check-logged-in: current_user ≠ no_user
+	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then 
-	@act1: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
-	@act2: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
+	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
+	@add-apt-num: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
 end
-
-
 
 /* REQ 15:  An administrator can update the medicine stock by adding more medicine batches. */
 event AddMedicine
@@ -91,33 +87,28 @@ any
 	medicine_name
 	batch
 	qty
-where 
-	@grd1: role(current_user) = Admin
-	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
-	@grd3: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
-	@grd4: medicine_name ∈ MEDICINE_NAME
-	@grd5: qty ∈ ℕ1
+where
+	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
+	@does-batch-exist: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
+	@check-medicine-name: medicine_name ∈ MEDICINE_NAME
+	@is-qty-positive-integer: qty ∈ ℕ1
 	@not-null: current_user ≠ no_user
-//	@grd7: pharmacy ∈ ran(pharmacies)
 then
-	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
-	@act2: medicine ≔ medicine ∪ {batch ↦ medicine_name}
-	@act3: medicine_qty ≔ {batch ↦ qty}
+	@add-stock-to-pharmacy: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
+	@add-medicine-name-to-batch: medicine ≔ medicine ∪ {batch ↦ medicine_name}
+	@add-qty-to-batch: medicine_qty ≔ {batch ↦ qty}
 end
 
-
-
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-//event getPrescription
-//any
-//	 result
-//where
-//	@grd1: current_user ∈ registered ∧ role(current_user) = Client
-//	@not-null: current_user ≠ no_user
-//	@grd2: result =  ran({nric(current_user)} ◁ prescriptions)
-//end
-
-
+event getPrescription
+any
+	 result
+where
+	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
+	@not-null: current_user ≠ no_user
+	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
+end
 
 /* Any administrator can update information about the pharmacy */
 /* Updates include number of available appointments for pickup of medicine packets per day */
@@ -126,28 +117,26 @@ any
 	pharmacy
 	apt_num
 where
-	@grd1: role(current_user) = Admin
+	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
 	@not-null: current_user ≠ no_user
-	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
-	@grd3: apt_num ∈ ℕ1
+	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
+	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then
-	@act1: appointment_num(pharmacy) ≔ apt_num 
+	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
 end 
 
-
-
-/* REQ 18:  An administrator or a staff can view the client’s details using their NRIC (MyKad) number. */
+/* REQ 18:  An administrator or a staff can view the client’s details using their 
+ * NRIC (MyKad) number. */
 event getClientName
 any 
-	user
 	ic
 	result
 where 
-	@grd1: user ∈ registered 
-	@grd2: role(current_user) ∈ {Admin, Staff}
+	@check-user-registered: current_user ∈ registered
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
 	@not-null: current_user ≠ no_user
-	@grd3: ic ∈ ran(nric)
-	@grd4: result = client_name(ic)
+	@does-nric-exist: ic ∈ ran(nric)
+	@get-client-name: result = client_name[{ic}]
 end	
 
 
@@ -160,13 +149,18 @@ end
 
 event ChangeUserPassword extends ChangeUserPassword
 end
-event RegisterClient extends  RegisterClient 
+
+/*Extension: Client registration includes NRIC and USER_NAME*/
+event RegisterClient extends RegisterClient 
 any 
 	ic
+	name
 where 
-	@grd1: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@does-nric-exist: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@is-name-username: name ∈ USER_NAME
 then 
-	@act1: nric ≔ nric ∪ {new_user ↦ ic}
+	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
+	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
 end
 
 event RegisterAdminOrStaff extends RegisterAdminOrStaff
