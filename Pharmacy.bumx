@@ -129,15 +129,14 @@ end
  * NRIC (MyKad) number. */
 event getClientName
 any 
-	user
 	ic
 	result
 where 
-	@check-user-registered: user ∈ registered
+	@check-user-registered: current_user ∈ registered
 	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
 	@not-null: current_user ≠ no_user
 	@does-nric-exist: ic ∈ ran(nric)
-	@get-client-name: result = client_name(ic)
+	@get-client-name: result = client_name[{ic}]
 end	
 
 event Login extends Login
