@@ -73,7 +73,7 @@ any
 where
 	@does-pharmacy-exist: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
 	@check-logged-in: current_user ≠ no_user
-	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+	@is-registered-admin: role(current_user) = Admin
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then 
 	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
@@ -105,7 +105,7 @@ event getPrescription
 any
 	 result
 where
-	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
+	@is-registered-client: role(current_user) = Client
 	@not-null: current_user ≠ no_user
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
@@ -134,7 +134,7 @@ any
 	result
 where 
 	@check-user-registered: user ∈ registered
-	@is-not-admin-or-staff: current_user ↦ Client ∉ role ∪ {current_user ↦ Client}
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
 	@not-null: current_user ≠ no_user
 	@does-nric-exist: ic ∈ ran(nric)
 	@get-client-name: result = client_name(ic)
