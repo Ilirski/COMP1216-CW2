@@ -152,10 +152,13 @@ end
 event RegisterClient extends RegisterClient 
 any 
 	ic
+	name
 where 
 	@does-nric-exist: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@is-name-username: name ∈ USER_NAME
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
+	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
 end
 
 event RegisterAdminOrStaff extends RegisterAdminOrStaff
