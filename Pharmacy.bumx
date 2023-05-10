@@ -148,7 +148,7 @@ end
 event ChangeUserPassword extends ChangeUserPassword
 end
 
-/*Extension: Client registration includes NRIC*/
+/*Extension: Client registration includes NRIC and USER_NAME*/
 event RegisterClient extends RegisterClient 
 any 
 	ic
