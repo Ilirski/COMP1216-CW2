@@ -1,5 +1,5 @@
 machine Pharmacy 
-refines User 
+refines User
 sees PharmacyContext
 
 variables
@@ -13,23 +13,41 @@ variables
 	medicine_qty
 	client_name
 	nric
-	prescriptions
-	medicine_info
-	last_medicine_date
+//	prescriptions
+//	medicine_info
+//	last_medicine_date
 	pharmacy_stock
 	appointment_num
 	
 	
 invariants
+	 /* An admin can register multiple pharmacies */
 	@inv1: pharmacies ∈ USER ↔ PHARMACIES
+	
+	 /* REQ 10 : */
+	 /* Each packet of medicine has a batch number*/
+	 /* Each batch number will link to a medicine name*/
 	@inv2: medicine ∈ BATCH_NUM ⇸ MEDICINE_NAME
+	
+	 /* Each batch of medicine will has its own quantity of stock */
+	 /* The stock only can be one integer number [0, ∞) */
 	@inv3: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+	
+	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@inv4: client_name ∈ NRIC ⇸ USER_NAME
 	@inv5: nric ∈ USER ⤔ NRIC
-	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
-	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
-	@inv8: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
+//	@inv6: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+	
+	/* REQ 12: */ 
+	/* Each prescription includes medicine_info (list of medicine) */
+	/* Prescription also includes last received medicine date */
+//	@inv7: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+//	@inv8: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
+	
+	/* REQ 14: A pharmacy has a medicine stock specifying the availability of medicines. */
 	@inv9: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
+	
+	/* REQ 16: A pharmacy has a daily number of appointments. */
 	@inv10: appointment_num ∈ PHARMACIES ⇸ ℕ1
 
 
@@ -40,20 +58,23 @@ then
 	@act3: medicine_qty ≔ ∅ 
 	@act4: client_name ≔ ∅
 	@act5: nric ≔ ∅
-	@act6: prescriptions ≔ ∅
-	@act7: medicine_info ≔ ∅
-	@act8: last_medicine_date ≔ ∅ 
+//	@act6: prescriptions ≔ ∅
+//	@act7: medicine_info ≔ ∅
+//	@act8: last_medicine_date ≔ ∅ 
 	@act9: pharmacy_stock ≔ ∅
 	@act10: appointment_num ≔ ∅
 end
 
 
+
+/* Only the admin can register a new pharmacy */
 event AddPharmacy
 any 
 	pharmacy
 	apt_num
 where
 	@grd1: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
+	@grd4: current_user ≠ no_user
 	@grd2: role(current_user) = Admin
 	@grd3: apt_num ∈ ℕ1
 then 
@@ -62,20 +83,21 @@ then
 end
 
 
+
+/* REQ 15:  An administrator can update the medicine stock by adding more medicine batches. */
 event AddMedicine
 any 
-	admin
 	pharmacy
 	medicine_name
 	batch
 	qty
 where 
-	@grd1: role(admin) = Admin
-	@grd2: pharmacy ∈ ran({admin} ◁ pharmacies)
+	@grd1: role(current_user) = Admin
+	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@grd3: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
 	@grd4: medicine_name ∈ MEDICINE_NAME
 	@grd5: qty ∈ ℕ1
-	@grd6: admin ∈ USER
+	@not-null: current_user ≠ no_user
 //	@grd7: pharmacy ∈ ran(pharmacies)
 then
 	@act1: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
@@ -83,29 +105,38 @@ then
 	@act3: medicine_qty ≔ {batch ↦ qty}
 end
 
-event getPrescription
-any
-	 client
-	 result
-where
-	@grd1: client ∈ registered ∧ role(client) = Client
-	@grd2: result =  ran({nric(client)} ◁ prescriptions)
-end
 
+
+/* REQ 13:  A client can retrieve their prescriptions from the system. */
+//event getPrescription
+//any
+//	 result
+//where
+//	@grd1: current_user ∈ registered ∧ role(current_user) = Client
+//	@not-null: current_user ≠ no_user
+//	@grd2: result =  ran({nric(current_user)} ◁ prescriptions)
+//end
+
+
+
+/* Any administrator can update information about the pharmacy */
+/* Updates include number of available appointments for pickup of medicine packets per day */
 event updateAptNum
 any 
-	admin
 	pharmacy
 	apt_num
 where
-	@grd1: role(admin) = Admin
-	@grd2: pharmacy ∈ ran({admin} ◁ pharmacies)
+	@grd1: role(current_user) = Admin
+	@not-null: current_user ≠ no_user
+	@grd2: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@grd3: apt_num ∈ ℕ1
-	@grd4: admin ∈ USER
 then
 	@act1: appointment_num(pharmacy) ≔ apt_num 
 end 
 
+
+
+/* REQ 18:  An administrator or a staff can view the client’s details using their NRIC (MyKad) number. */
 event getClientName
 any 
 	user
@@ -113,10 +144,13 @@ any
 	result
 where 
 	@grd1: user ∈ registered 
-	@grd2: role(user) = Admin ∨ role(user) = Staff
+	@grd2: role(current_user) ∈ {Admin, Staff}
+	@not-null: current_user ≠ no_user
 	@grd3: ic ∈ ran(nric)
 	@grd4: result = client_name(ic)
 end	
+
+
 
 event Login extends Login
 end
@@ -124,6 +158,8 @@ end
 event Logout extends Logout
 end
 
+event ChangeUserPassword extends ChangeUserPassword
+end
 event RegisterClient extends  RegisterClient 
 any 
 	ic
