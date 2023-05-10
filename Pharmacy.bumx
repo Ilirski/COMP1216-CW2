@@ -13,9 +13,9 @@ variables
 	medicine_qty
 	client_name
 	nric
-//	prescriptions
-//	medicine_info
-//	last_medicine_date
+	prescriptions
+	medicine_info
+	last_medicine_date
 	pharmacy_stock
 	appointment_num
 	
@@ -31,7 +31,7 @@ invariants
 	
 	 /* Each batch of medicine will has its own quantity of stock */
 	 /* The stock only can be one integer number [0, ∞) */
-	@typeof-medicineqty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+	@typeof-medicine-qty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
 	
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
@@ -58,11 +58,11 @@ then
 	@act-init-medicine-qty: medicine_qty ≔ ∅ 
 	@act-init-client-name: client_name ≔ ∅
 	@act-init-nric: nric ≔ ∅
-	@act-prescriptions: prescriptions ≔ ∅
-	@act-medicine-info: medicine_info ≔ ∅
-	@act-last-medicine-date: last_medicine_date ≔ ∅ 
-	@act-pharmacy-stock: pharmacy_stock ≔ ∅
-	@act-daily-appointment-num: appointment_num ≔ ∅
+	@act-init-prescriptions: prescriptions ≔ ∅
+	@act-init-medicine-info: medicine_info ≔ ∅
+	@act-init-last-medicine-date: last_medicine_date ≔ ∅ 
+	@act-init-pharmacy-stock: pharmacy_stock ≔ ∅
+	@act-init-daily-appointment-num: appointment_num ≔ ∅
 end
 
 /* Only the admin can register a new pharmacy */
@@ -75,6 +75,7 @@ where
 	@check-logged-in: current_user ≠ no_user
 	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
+	@pharmacy-not-in-appointment-num-domain: pharmacy ∉ dom(appointment_num)
 then 
 	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
 	@add-apt-num: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
@@ -101,18 +102,19 @@ then
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-event getPrescription
+event GetPrescription
 any
 	 result
 where
 	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
 	@not-null: current_user ≠ no_user
+	@current-user-has-nric: current_user ∈ dom(nric)
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
 
 /* Any administrator can update information about the pharmacy */
 /* Updates include number of available appointments for pickup of medicine packets per day */
-event updateAptNum
+event UpdateAptNum
 any 
 	pharmacy
 	apt_num
@@ -127,7 +129,7 @@ end
 
 /* REQ 18:  An administrator or a staff can view the client’s details using their 
  * NRIC (MyKad) number. */
-event getClientName
+event GetClientName
 any 
 	ic
 	result
@@ -138,8 +140,6 @@ where
 	@does-nric-exist: ic ∈ ran(nric)
 	@get-client-name: result = client_name[{ic}]
 end	
-
-
 
 event Login extends Login
 end
@@ -157,7 +157,8 @@ any
 	name
 where 
 	@does-nric-exist: ic ∈ NRIC ∧ ic ∉ ran(nric)
-	@is-name-username: name ∈ USER_NAME
+	@does-client-name-exist: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
+	@does-new-user-exist: new_user ∈ USER ∧ new_user ∉ dom(nric)
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
 	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
