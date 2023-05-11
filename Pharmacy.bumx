@@ -36,7 +36,7 @@ invariants
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
 	@typeof-nric: nric ∈ USER ⤔ NRIC
-	@typeof-prescriptions-list: prescriptions ∈ NRIC ⤔ PRESCRIPTIONS
+	@typeof-prescriptions-list: prescriptions ∈ NRIC ⇸ PRESCRIPTIONS
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
@@ -108,6 +108,7 @@ any
 	batch_num
 	pres
 where
+	@does-current-user-have-role: current_user ∈ dom(role)
 	@is-user-admin-or-staff: role(current_user) ∈ {Admin, Staff}
 	@does-batch-num-exist: batch_num ∈ dom(medicine)
 	@does-nric-exist: ic ∈ ran(nric)
@@ -175,7 +176,7 @@ any
 where 
 	@is-nric-unique: ic ∈ NRIC ∧ ic ∉ ran(nric)
 	@is-client-name-unique: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
-	@does-new-user-have-nric: new_user ∈ USER ∧ new_user ∉ dom(nric)
+	@no-nric-belongs-to-new-user: new_user ∈ USER ∧ new_user ∉ dom(nric)
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
 	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
