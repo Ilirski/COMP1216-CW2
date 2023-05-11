@@ -8,17 +8,6 @@ variables
 	current_user
 	role
 	
-//	pharmacies
-//	medicine
-//	medicine_qty
-//	client_name
-//	nric
-////	prescriptions
-////	medicine_info
-////	last_medicine_date
-//	pharmacy_stock
-//	appointment_num
-	
 	pharmacies
 	medicine
 	medicine_qty
@@ -26,6 +15,7 @@ variables
 	nric
 	prescriptions
 	medicine_info
+//	received_medicine_info
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
@@ -53,6 +43,10 @@ invariants
 	/* Each prescription includes medicine_info (list of medicine) */
 	/* Prescription also includes last received medicine date */
 	@prescription-medicine-info: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+//---------------------------------------------------------------------------------------------------------------------------------
+//	@prescription-used-medicine-info: used_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+//	@inv1: received_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+//---------------------------------------------------------------------------------------------------------------------------------
 	@prescription-last-medicine-date: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
 	
 	/* REQ 14: A pharmacy has a medicine stock specifying the availability of medicines. */
@@ -112,6 +106,7 @@ then
 	@act-init-nric: nric ≔ ∅
 	@act-prescriptions: prescriptions ≔ ∅
 	@act-medicine-info: medicine_info ≔ ∅
+//	@act-received-medicine-info: received_medicine_info ≔ ∅
 	@act-last-medicine-date: last_medicine_date ≔ ∅ 
 	@act-pharmacy-stock: pharmacy_stock ≔ ∅
 	@act-daily-appointment-num: appointment_num ≔ ∅
@@ -178,7 +173,7 @@ where
 	@grd3: ic ∈ ran(nric)
 	@grd4: ic ∉ dom(prescriptions)
 	@grd5: pres ∈ PRESCRIPTIONS
-//	@grd: pres ∉ ran(prescriptions)
+	@grd: pres ∉ ran(prescriptions)
 then 
 	@act1:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
 	@act2: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
@@ -221,38 +216,56 @@ where
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then
 	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
-end 
-//---------------------------------------------------------------------------------
+end
 
-
-//event updateAptNum
-//any 
-//	pharmacy
-//	apt_num
-//where
-//	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
-//	@not-null: current_user ≠ no_user
-//	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
-//	@is-apt-num-positive-integer: apt_num ∈ ℕ1
-//then
-//	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
-//end 
-
-///* REQ 18:  An administrator or a staff can view the client’s details using their 
-// * NRIC (MyKad) number. */
-//event getClientName
+//event appendPrescription
 //any 
 //	ic
-//	result
-//where 
-//	@check-user-registered: current_user ∈ registered
-//	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-//	@not-null: current_user ≠ no_user
-//	@does-nric-exist: ic ∈ ran(nric)
-//	@get-client-name: result = client_name[{ic}]
+//	batch_num
+//	p
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: batch_num ∈ dom(medicine)
+//	@grd3: ic ∈ dom(prescriptions)
+//	@grd4: p = prescriptions(ic)
+//	@grd5: medicine[{batch_num}] ⊈ medicine[{medicine_info(p)}]
+//then  
+//    @act1: medicine_info ≔ medicine_info ∪ {p ↦ (batch_num)}
 //end	
 
+///*receiving medicine */
+//event updatePrescription
+//any 
+//	ic
+//	pres
+//	batch_num
+//	med
+//	stock_created
+//	med_gave_away
+//where 
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd3: ic ∈ dom(prescriptions)
+//	@grd4: pres = prescriptions(ic)
+//	@grd5: batch_num ∈ ran({pres} ◁ medicine_info)
+//	@grd6: med ∈ ran({batch_num} ◁ medicine)
+//	@grd7: stock_created = medicine_qty(batch_num)
+//	@grd8: med_gave_away = card(medicine_info ▷ {batch_num})
+//	@grd9: stock_created ≥ med_gave_away
+//then 
+//	@act1: medicine_info ≔ medicine_info ∖ ({pres} ◁ medicine_info)
+//	@act2: received_medicine_info ≔ received_medicine_info ∪ {({pres} ◁ medicine_info)}
+//	@act3: medicine_qty ≔ medicine_qty ∖ {batch_num ↦ stock_created}
+//	@act4: medicine_qty ≔ medicine_qty ∪ {batch_num ↦ (stock_created − med_gave_away)}
+//	@act5: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+//end
 
+//event UpdateBatchNumberInPrescription
+//any
+//where
+//then
+//end
+
+//---------------------------------------------------------------------------------
 
 event Login extends Login
 end
