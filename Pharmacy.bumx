@@ -8,20 +8,31 @@ variables
 	current_user
 	role
 	
+//	pharmacies
+//	medicine
+//	medicine_qty
+//	client_name
+//	nric
+////	prescriptions
+////	medicine_info
+////	last_medicine_date
+//	pharmacy_stock
+//	appointment_num
+	
 	pharmacies
 	medicine
 	medicine_qty
 	client_name
 	nric
-//	prescriptions
-//	medicine_info
-//	last_medicine_date
+	prescriptions
+	medicine_info
+	last_medicine_date
 	pharmacy_stock
 	appointment_num
 	
-	
 invariants
-	 /* An admin can register multiple pharmacies */
+
+	/* An admin can register multiple pharmacies */
 	@typeof-pharmacies: pharmacies ∈ USER ↔ PHARMACIES
 	
 	 /* REQ 10 : */
@@ -36,7 +47,7 @@ invariants
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
 	@typeof-nric: nric ∈ USER ⤔ NRIC
-	@typeof-prescriptions-list: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+	@typeof-prescriptions-list: prescriptions ∈ NRIC ⤔ PRESCRIPTIONS
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
@@ -49,10 +60,51 @@ invariants
 	
 	/* REQ 16: A pharmacy has a daily number of appointments. */
 	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
+	
+	
+//	 /* An admin can register multiple pharmacies */
+//	@typeof-pharmacies: pharmacies ∈ USER ↔ PHARMACIES
+//	
+//	 /* REQ 10 : */
+//	 /* Each packet of medicine has a batch number*/
+//	 /* Each batch number will link to a medicine name*/
+//	@typeof-medicine: medicine ∈ BATCH_NUM ⇸ MEDICINE_NAME
+//	
+//	 /* Each batch of medicine will has its own quantity of stock */
+//	 /* The stock only can be one integer number [0, ∞) */
+//	@typeof-medicineqty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+//	
+//	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
+//	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
+//	@typeof-nric: nric ∈ USER ⤔ NRIC
+////	@typeof-prescriptions-list: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+//	
+//	/* REQ 12: */ 
+//	/* Each prescription includes medicine_info (list of medicine) */
+//	/* Prescription also includes last received medicine date */
+////	@prescription-medicine-info: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+////	@prescription-last-medicine-date: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
+//	
+//	/* REQ 14: A pharmacy has a medicine stock specifying the availability of medicines. */
+//	@typeof-pharmacy-stock: pharmacy_stock ∈ PHARMACIES ↔ BATCH_NUM
+//	
+//	/* REQ 16: A pharmacy has a daily number of appointments. */
+//	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
 
 
 event INITIALISATION extends INITIALISATION
 then
+//	@act-init-pharmacies: pharmacies ≔ ∅
+//	@act-init-medicine: medicine ≔ ∅
+//	@act-init-medicine-qty: medicine_qty ≔ ∅ 
+//	@act-init-client-name: client_name ≔ ∅
+//	@act-init-nric: nric ≔ ∅
+////	@act-prescriptions: prescriptions ≔ ∅
+////	@act-medicine-info: medicine_info ≔ ∅
+////	@act-last-medicine-date: last_medicine_date ≔ ∅ 
+//	@act-pharmacy-stock: pharmacy_stock ≔ ∅
+//	@act-daily-appointment-num: appointment_num ≔ ∅
+	
 	@act-init-pharmacies: pharmacies ≔ ∅
 	@act-init-medicine: medicine ≔ ∅
 	@act-init-medicine-qty: medicine_qty ≔ ∅ 
@@ -101,6 +153,38 @@ then
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
+//event getPrescription
+//any
+//	 result
+//where
+//	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
+//	@not-null: current_user ≠ no_user
+//	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
+//end
+
+/* Any administrator can update information about the pharmacy */
+/* Updates include number of available appointments for pickup of medicine packets per day */
+
+
+//---------------------------------------------------------------------------------
+event initPrescription
+any 
+	ic
+	batch_num
+	pres
+where
+	@grd1: role(current_user) ∈ {Admin, Staff}
+	@grd2: batch_num ∈ dom(medicine)
+	@grd3: ic ∈ ran(nric)
+	@grd4: ic ∉ dom(prescriptions)
+	@grd5: pres ∈ PRESCRIPTIONS
+//	@grd: pres ∉ ran(prescriptions)
+then 
+	@act1:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+	@act2: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+end
+
+/* REQ 13:  A client can retrieve their prescriptions from the system. */
 event getPrescription
 any
 	 result
@@ -110,9 +194,23 @@ where
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
 
+/* REQ 18:  An administrator or a staff can view the client’s details using their 
+ * NRIC (MyKad) number. */
+event GetClientName
+any 
+	ic
+	result
+where 
+	@check-user-registered: current_user ∈ registered
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@not-null: current_user ≠ no_user
+	@does-nric-exist: ic ∈ ran(nric)
+	@get-client-name: result = client_name[{ic}]
+end	
+
 /* Any administrator can update information about the pharmacy */
 /* Updates include number of available appointments for pickup of medicine packets per day */
-event updateAptNum
+event UpdateAptNum
 any 
 	pharmacy
 	apt_num
@@ -124,20 +222,35 @@ where
 then
 	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
 end 
+//---------------------------------------------------------------------------------
 
-/* REQ 18:  An administrator or a staff can view the client’s details using their 
- * NRIC (MyKad) number. */
-event getClientName
-any 
-	ic
-	result
-where 
-	@check-user-registered: current_user ∈ registered
-	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@not-null: current_user ≠ no_user
-	@does-nric-exist: ic ∈ ran(nric)
-	@get-client-name: result = client_name[{ic}]
-end	
+
+//event updateAptNum
+//any 
+//	pharmacy
+//	apt_num
+//where
+//	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+//	@not-null: current_user ≠ no_user
+//	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
+//	@is-apt-num-positive-integer: apt_num ∈ ℕ1
+//then
+//	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
+//end 
+
+///* REQ 18:  An administrator or a staff can view the client’s details using their 
+// * NRIC (MyKad) number. */
+//event getClientName
+//any 
+//	ic
+//	result
+//where 
+//	@check-user-registered: current_user ∈ registered
+//	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+//	@not-null: current_user ≠ no_user
+//	@does-nric-exist: ic ∈ ran(nric)
+//	@get-client-name: result = client_name[{ic}]
+//end	
 
 
 

@@ -14,11 +14,10 @@ variables
 	client_name
 	nric
 	prescriptions
-//	medicine_info
-//	last_medicine_date
+	medicine_info
+	last_medicine_date
 	pharmacy_stock
 	appointment_num
-	pres
 	
 	
 	appointment
@@ -27,29 +26,24 @@ variables
 	booked
 	booking
 	accepted_booked
-//	client_ic
+	rejected_booked
 	available_appointment 
 	booked_appointment
 	accepted_appointment 
 	rejected_appointment  
 	
-//	client_appointment
-//	pharmacy_appointment_list
-	
 invariants
 	@inv1: appointment ⊆ DATE
 	@inv2: phars ⊆ PHARMACIES
-	@inv3: pres ⊆ PRESCRIPTIONS
-	@inv4: booked ⊆ NRIC
-	@inv5: booking ⊆ appointment
-	@inv6: accepted_booked ⊆ NRIC 
-	@inv7: prescriptions ∈ pres ⤔ ran(nric)
-	@inv8: available_appointment ∈ appointment ⇸ PHARMACIES
-	@inv9: booked_appointment ∈ appointment ⇸ PHARMACIES
-	@inv10: offer ∈ booked ⤔ appointment
-//	@inv9: offer ∈ booked ⤔ appointment
-	@inv11: accepted_appointment ∈ accepted_booked ⤔ booking
-	@inv12: rejected_appointment ∈ booked ⤔ appointment
+	@inv3: booked ⊆ NRIC
+	@inv4: booking ⊆ appointment
+	@inv5: accepted_booked ⊆ NRIC 
+	@inv6: rejected_booked ⊆ NRIC
+	@inv7: available_appointment ∈ appointment ⇸ PHARMACIES
+	@inv8: booked_appointment ∈ appointment ⇸ PHARMACIES
+	@inv9: offer ∈ booked ↔ appointment
+	@inv10: accepted_appointment ∈ accepted_booked ↔ booking
+	@inv11: rejected_appointment ∈ rejected_booked ↔ appointment
 	
 //	@inv4: client_ic ⊆ NRIC
 //	@inv6: prescriptions ∈ booked ⤖ pres
@@ -66,54 +60,215 @@ event INITIALISATION extends INITIALISATION
 then
 	@act11: appointment ≔ ∅
 	@act12: phars ≔ ∅
-	@act13: prescriptions ≔ ∅
-	@act14: offer ≔ ∅ 
-	@act15: booked ≔ ∅ 
-	@act16: booking ≔ ∅
-	@act17: accepted_booked ≔ ∅ 
-	@act18: pres ≔ ∅
-	@act19: available_appointment ≔ ∅
-	@act20: booked_appointment ≔ ∅
-	@act21: accepted_appointment ≔ ∅
-	@act22: rejected_appointment ≔ ∅
-	
-	//--------------------------------
-//	@act18: client_ic ≔ ∅
-	
+	@act13: offer ≔ ∅ 
+	@act14: booked ≔ ∅ 
+	@act15: booking ≔ ∅
+	@act16: accepted_booked ≔ ∅ 
+	@act17: rejected_booked ≔ ∅ 
+	@act18: available_appointment ≔ ∅
+	@act19: booked_appointment ≔ ∅
+	@act20: accepted_appointment ≔ ∅
+	@act21: rejected_appointment ≔ ∅
 end
 
-//event addDateToAppointment  // relate a date to every pharmacy appointment
-//any
-//	apt_num
-//	appointment
-//	available_appointment_date //date
-//	pharmacy //pharmacy name
-//	get_date
+//event BookAppointment
+//any 
+//	ic
 //where
-//	@grd1: apt_num ∈ ℕ1
-//	@grd2: appointment ∈ dom(appointment_date)
-//	@grd3: available_appointment_date ∈ ran(appointment_date)
-//	@grd4: pharmacy ∈ ran(pharmacies)
-//	@grd5: {(available_appointment_date ↦ appointment_num)} ↦ pharmacy ∉ pharmacy_appointment_list
-//	@grd6: get_date ∈ dom(pharmacy_appointment_list)
-//	@grd7: available_appointment_date ∉ dom(pharmacy_apppointment_num)
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∉ booked
+//	@grd4: ic ∈ ran(nric)
+////	@grd2: ic ∈ ran(nric)
+////	@grd3: prescription = no_prescription
+////	@grd4: date = no_date
 //then
-//	@act1: appointment_num(pharmacy) ≔ apt_num
-//	@act1: pharmacy_appointment_list ≔ pharmacy_appointment_list ∪ {{(appointment_date ↦ appointment_num)} ↦ pharmacy}
+//	@act1: booked ≔ booked ∪ {ic}
 //end
-
-
 //
-//event CreateDate
-//any
-//	dt
+////event CreateNewPrescription
+////any 
+////	p
+////	ic
+////where
+////	@grd1: role(current_user) ∈ {Admin, Staff}
+////	@grd2: current_user ≠ no_user
+////	@grd3: ic ∈ booked
+////	@grd4: ic ∈ ran(nric)
+////	@grd7: p ∉ pres
+//////	@grd9: ic ∉ ran(prescriptions)
+//////	@grd8: p ↦ ic ∉ prescriptions	
+////then 
+////	@act2: pres ≔ pres ∪ {p}
+////	@act1: prescriptions ≔ prescriptions ∪ {p ↦ ic}
+////end
+//
+////event CreateUpdatedPrescription
+////any 
+////	p
+////	ic
+////	updated_p
+////where
+////	@grd1: role(current_user) ∈ {Admin, Staff}
+////	@grd2: current_user ≠ no_user
+////	@grd3: ic ∈ booked
+////	@grd4: ic ∈ ran(nric)
+////	@grd5: updated_p ∉ pres
+////	@grd6: updated_p ≠ p
+////	@grd7: p ∈ pres
+////	@grd8: p ↦ ic ∈ prescriptions	
+////then 
+////	@act2: pres ≔ (pres ∖ {p}) ∪ {updated_p}
+////	@act1: prescriptions ≔ (prescriptions ∖ {p ↦ ic}) ∪ {updated_p ↦ ic }
+////end
+//
+////event OfferAppointment
+////any p ic d
+////where
+////	@grd1: role(current_user) ∈ {Admin, Staff}
+////	@grd2: current_user ≠ no_user
+////	@grd3: p ∈ pres
+////	@grd4: ic ∈ booked
+////	@grd5: ic ↦ p ∈ prescriptions
+////	@grd6: d ∉ appointment
+////	@grd7: ic ↦ d ∉ offer
+////then
+////	@act1: offer ≔ offer ∪ {ic ↦ d}	
+////end
+//
+//
+//event CreateAvailableAppointment
+//any d ph apt_created apt_num 
 //where
-//	@grd1: dt ∉ date
-//	@grd2: card(pharmacies) ≥ 1
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+////	@grd3: ph ∈ ran({current_user} ◁ pharmacies)
+//	@grd3:ph ∈ ran (pharmacies)
+//	@grd4: d ∉ appointment
+////	@grd5: d ∉ booking
+//	@grd6: d ↦ ph ∉ available_appointment
+//	@grd7: apt_created = card(available_appointment ▷ {ph})
+//	@grd8: apt_num = appointment_num(ph)
+//	@grd9: apt_created ≤ apt_num − 1
 //then
-//	@act1: date ≔ date ∪ {dt}
+//	@act1:appointment ≔ appointment ∪ {d}
+//	@act2:available_appointment ≔ available_appointment ∪ {d ↦ ph}
 //end
-	
+//
+////-----------------------------------------------------------------
+//event OfferAppointment
+//any p ic d ph 
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: p ∈ ran(prescriptions)
+//	@grd4: ic ∈ booked
+//	@grd5: ic ∈ ran(nric)
+//	@grd11: d ∉ ran(rejected_appointment) 
+//	@grd6: ic ↦ p ∈ prescriptions
+//	@grd7: d ∈ appointment
+//	@grd8: ph ∈ ran (pharmacies)
+////	@grd7: of_d ∉ appointment
+//	@grd9: ic ↦ d ∉ offer
+//	@grd10: d ↦ ph ∈ available_appointment
+//then
+//	@act1: offer ≔ offer ∪ {ic ↦ d}	
+//end
+//
+//event getOfferedAppointment
+//any result ic p d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: p ∈ dom(prescriptions)
+//	@grd6: d ∈ booking
+//	@grd7: ph ∈ ran (pharmacies)
+//	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∉ accepted_appointment
+//	@grd10: d ↦ ph ∈ available_appointment 
+//	@grd11: result = ({ic} ◁ offer)
+//end
+//
+//event AcceptAppointment
+//any 
+//	ic d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ ran({ic} ◁ offer)
+//	@grd6: ph ∈ ran({d} ◁ available_appointment)
+////	@grd5: d ∈ ran(offer)
+////	@grd6: d ∉ booking
+////	@grd7: ph ∈ ran(pharmacies)
+////	@grd8: ic ↦ d ∈ offer
+////	@grd9: d ↦ ph ∈ available_appointment 
+////	@grd10: ic ↦ d ∉ accepted_appointment
+//	
+//then
+//	@act1: booking ≔ booking ∪ {d}
+//	@act2: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+//	@act3: offer ≔ offer ∖ {ic ↦ d}
+//	@act4: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+//	@act5: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+//	@act6: accepted_booked ≔ accepted_booked ∪ {ic}
+//	@act7: booked ≔ booked ∖ {ic}
+//	@act8: rejected_appointment ≔ {ic} ⩤ rejected_appointment
+//	
+//end
+//
+//event RejectAppointment
+//any ic d
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ appointment
+//	@grd6: d ∉ booking
+//	@grd7: ic ↦ d ∈ offer
+//	@grd8: ic ↦ d ∉ accepted_appointment
+//	@grd9: ic ↦ d ∉ rejected_appointment
+//	
+//then
+////	@act1: booking ≔ booking ∪ {d}
+//	@act2: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+//	@act3: offer ≔ offer ∖ {ic ↦ d}
+//
+////	@act4: booked ≔ booked ∖ {ic}
+//	
+//end
+//
+////event RebookAppointment
+////any ic d ph
+////where
+////	@grd1: role(current_user) = Client
+////	@grd2: current_user ≠ no_user
+////	
+//////	@grd3: ic ∈ booked 
+//////	@grd4: d ∈ booking
+//////	@grd5: ph ∈ ran(pharmacies)
+//////	@grd6: d ↦ ph ∉ available_appointment 
+//////	@grd7: d ↦ ph ∈ booked_appointment
+//////	@grd8: ic ↦ d ∉ offer
+//////	@grd9: ic ↦ d ∈ accepted_appointment
+//////	@grd10: ic ↦ d ∉ rejected_appointment
+//////	@grd11: d = accepted_appointment(ic)
+//////	@grd12: ph = available_appointment(d)
+////then
+//////	@act1: booked ≔ booked ∪ {ic}
+//////	@act2: available_appointment ≔ available_appointment ∪ {d ↦ ph}
+////	
+//////	@act1: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+//////	@act2: offer ≔ offer ∖ {ic ↦ d}
+//////	@act3: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+//////	@act4: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+////end	
+//
+////-----------------------------------------------------------------
 
 event BookAppointment
 any 
@@ -122,7 +277,9 @@ where
 	@grd1: role(current_user) = Client
 	@grd2: current_user ≠ no_user
 	@grd3: ic ∉ booked
-	@grd4: ic ∈ ran(nric)
+	@grd4: ic ∉ accepted_booked
+	@grd5: ic ∈ ran(nric)
+	@grd6: ic ∈ ran({current_user} ◁ nric)
 //	@grd2: ic ∈ ran(nric)
 //	@grd3: prescription = no_prescription
 //	@grd4: date = no_date
@@ -130,41 +287,41 @@ then
 	@act1: booked ≔ booked ∪ {ic}
 end
 
-event CreateNewPrescription
-any 
-	p
-	ic
-where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd7: p ∉ pres
-	@grd9: ic ∉ ran(prescriptions)
-//	@grd8: p ↦ ic ∉ prescriptions	
-then 
-	@act2: pres ≔ pres ∪ {p}
-	@act1: prescriptions ≔ prescriptions ∪ {p ↦ ic}
-end
-
-event CreateUpdatedPrescription
-any 
-	p
-	ic
-	updated_p
-where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd5: updated_p ∉ pres
-	@grd6: updated_p ≠ p
-	@grd7: p ∈ pres
-	@grd8: p ↦ ic ∈ prescriptions	
-then 
-	@act2: pres ≔ (pres ∖ {p}) ∪ {updated_p}
-	@act1: prescriptions ≔ (prescriptions ∖ {p ↦ ic}) ∪ {updated_p ↦ ic }
-end
+//event CreateNewPrescription
+//any 
+//	p
+//	ic
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd7: p ∉ pres
+//	@grd9: ic ∉ ran(prescriptions)
+////	@grd8: p ↦ ic ∉ prescriptions	
+//then 
+//	@act2: pres ≔ pres ∪ {p}
+//	@act1: prescriptions ≔ prescriptions ∪ {p ↦ ic}
+//end
+//
+//event CreateUpdatedPrescription
+//any 
+//	p
+//	ic
+//	updated_p
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ accepted_booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: updated_p ∉ pres
+//	@grd6: updated_p ≠ p
+//	@grd7: p ∈ pres
+//	@grd8: p ↦ ic ∈ prescriptions	
+//then 
+//	@act2: pres ≔ (pres ∖ {p}) ∪ {updated_p}
+//	@act1: prescriptions ≔ (prescriptions ∖ {p ↦ ic}) ∪ {updated_p ↦ ic}
+//end
 
 //event OfferAppointment
 //any p ic d
@@ -203,13 +360,27 @@ end
 event OfferAppointment
 any p ic d ph 
 where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user	
+//	@grd3: p ∈ pres
+//	@grd4: ic ∈ booked
+//	@grd5: ic ∉ dom(offer)
+//	@grd6: ic ∈ ran(nric)
+//	@grd7: d ∉ ran({ic} ◁ rejected_appointment) 
+//	@grd8: p ↦ ic ∈ prescriptions
+//	@grd9: d ∈ appointment
+//	@grd10: ph ∈ ran (pharmacies)
+////	@grd7: of_d ∉ appointment
+//	@grd11: ic ↦ d ∉ offer
+//	@grd12: d ↦ ph ∈ available_appointment
+
 	@grd1: role(current_user) ∈ {Admin, Staff}
 	@grd2: current_user ≠ no_user
-	@grd3: p ∈ pres
+	@grd3: p ∈ ran(prescriptions)
 	@grd4: ic ∈ booked
 	@grd5: ic ∈ ran(nric)
 	@grd11: d ∉ ran(rejected_appointment) 
-	@grd6: p ↦ ic ∈ prescriptions
+	@grd6: ic ↦ p ∈ prescriptions
 	@grd7: d ∈ appointment
 	@grd8: ph ∈ ran (pharmacies)
 //	@grd7: of_d ∉ appointment
@@ -222,11 +393,23 @@ end
 event getOfferedAppointment
 any result ic p d ph
 where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: p ∈ dom(prescriptions)
+////	@grd5: p ∈ pres
+//	@grd6: d ∈ booking
+//	@grd7: ph ∈ ran (pharmacies)
+//	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∉ accepted_appointment
+//	@grd10: d ↦ ph ∈ available_appointment 
+//	@grd11: result = ({ic} ◁ offer)
 	@grd1: role(current_user) = Client
 	@grd2: current_user ≠ no_user
 	@grd3: ic ∈ booked
 	@grd4: ic ∈ ran(nric)
-	@grd5: p ∈ pres
+	@grd5: p ∈ dom(prescriptions)
 	@grd6: d ∈ booking
 	@grd7: ph ∈ ran (pharmacies)
 	@grd8: ic ↦ d ∈ offer
@@ -253,14 +436,14 @@ where
 //	@grd10: ic ↦ d ∉ accepted_appointment
 	
 then
-	@act1: booking ≔ booking ∪ {d}
-	@act2: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
-	@act3: offer ≔ offer ∖ {ic ↦ d}
-	@act4: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
-	@act5: available_appointment ≔ available_appointment ∖ {d ↦ ph}
-	@act6: accepted_booked ≔ accepted_booked ∪ {ic}
-	@act7: booked ≔ booked ∖ {ic}
-	@act8: rejected_appointment ≔ {ic} ⩤ rejected_appointment
+	@act1: booked ≔ booked ∖ {ic}
+	@act2: accepted_booked ≔ accepted_booked ∪ {ic}
+	@act3: booking ≔ booking ∪ {d}
+	@act4: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+	@act5: offer ≔ offer ∖ {ic ↦ d}
+	@act6: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+	@act7: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+//	@act8: rejected_appointment ≔ {ic} ⩤ rejected_appointment
 	
 end
 
@@ -273,44 +456,98 @@ where
 	@grd4: ic ∈ ran(nric)
 	@grd5: d ∈ appointment
 	@grd6: d ∉ booking
-	@grd7: ic ↦ d ∈ offer
-	@grd8: ic ↦ d ∉ accepted_appointment
-	@grd9: ic ↦ d ∉ rejected_appointment
+	@grd7: d ∈ ran({ic} ◁ offer)
+	
+	@grd8: ic ↦ d ∈ offer
+	@grd9: ic ↦ d ∉ accepted_appointment
+	@grd10: ic ↦ d ∉ rejected_appointment
 	
 then
+	@act1: booked ≔ booked ∖ {ic}
+	@act2: rejected_booked ≔ rejected_booked ∪ {ic}
 //	@act1: booking ≔ booking ∪ {d}
-	@act2: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
-	@act3: offer ≔ offer ∖ {ic ↦ d}
-
-//	@act4: booked ≔ booked ∖ {ic}
+	@act3: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+	@act4: offer ≔ offer ∖ {ic ↦ d}
+	
 	
 end
 
-//event RebookAppointment
-//any ic d ph
+event ViewAppointment
+any result ic d ph
+where
+	@grd1: role(current_user) = Client
+	@grd2: current_user ≠ no_user
+	@grd3: ic ∈ accepted_booked
+	@grd4: ic ∈ ran(nric)
+	@grd5: d ∈ booking
+	@grd6: d ∈ ran({ic} ◁ accepted_appointment)
+	@grd7: ph ∉ ran({d} ◁ available_appointment)
+	@grd8: ph ∈ ran({d} ◁ booked_appointment)
+	
+//	@grd6: ph ∈ ran (pharmacies)
+//	@grd8: ic ↦ d ∈ offer
+	@grd9: ic ↦ d ∈ accepted_appointment
+	@grd10: d ↦ ph ∉ available_appointment 
+	@grd11: result = ({ic} ◁ accepted_appointment)
+end
+	
+	
+//any result ic p d ph
 //where
 //	@grd1: role(current_user) = Client
 //	@grd2: current_user ≠ no_user
-//	
-////	@grd3: ic ∈ booked 
-////	@grd4: d ∈ booking
-////	@grd5: ph ∈ ran(pharmacies)
-////	@grd6: d ↦ ph ∉ available_appointment 
-////	@grd7: d ↦ ph ∈ booked_appointment
-////	@grd8: ic ↦ d ∉ offer
-////	@grd9: ic ↦ d ∈ accepted_appointment
-////	@grd10: ic ↦ d ∉ rejected_appointment
-////	@grd11: d = accepted_appointment(ic)
-////	@grd12: ph = available_appointment(d)
-//then
-////	@act1: booked ≔ booked ∪ {ic}
-////	@act2: available_appointment ≔ available_appointment ∪ {d ↦ ph}
-//	
-////	@act1: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
-////	@act2: offer ≔ offer ∖ {ic ↦ d}
-////	@act3: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
-////	@act4: available_appointment ≔ available_appointment ∖ {d ↦ ph}
-//end	
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: p ∈ pres
+//	@grd6: d ∈ booking
+//	@grd7: ph ∈ ran (pharmacies)
+//	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∉ accepted_appointment
+//	@grd10: d ↦ ph ∈ available_appointment 
+//	@grd11: result = ({ic} ◁ offer)
+
+event RebookAppointment
+any ic d ph
+where
+	@grd1: role(current_user) = Client
+	@grd2: current_user ≠ no_user
+	
+	@grd3: ic ∈ accepted_booked
+	@grd4: ic ∈ ran(nric)
+	@grd5: d ∈ booking
+	@grd6: ph ∉ ran({d} ◁ available_appointment)
+	@grd10: ph ∈ ran({d} ◁ booked_appointment)
+	@grd7: ic ↦ d ∉ offer
+	@grd8: ic ↦ d ∈ accepted_appointment
+	@grd9: ic ↦ d ∉ rejected_appointment
+//	@grd5: d ∈ appointment
+//	@grd3: ic ∈ booked 
+//	@grd4: d ∈ booking
+//	@grd5: ph ∈ ran(pharmacies)
+//	@grd6: d ↦ ph ∉ available_appointment 
+//	@grd7: d ↦ ph ∈ booked_appointment
+//	@grd8: ic ↦ d ∉ offer
+//	@grd9: ic ↦ d ∈ accepted_appointment
+//	@grd10: ic ↦ d ∉ rejected_appointment
+//	@grd11: d = accepted_appointment(ic)
+//	@grd12: ph = available_appointment(d)
+then
+	@act1: appointment ≔ appointment ∪ {d}
+	@act2: booking ≔ booking ∖ {d}
+	@act3: booked ≔ booked ∪ {ic}
+	@act4: accepted_booked ≔ accepted_booked ∖ {ic}
+	@act5: rejected_booked  ≔ rejected_booked ∪ {ic}
+	@act6: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+	@act7: accepted_appointment ≔ accepted_appointment ∖ {ic ↦ d}
+	@act8: available_appointment ≔ available_appointment ∪ {d ↦ ph}
+	@act9: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
+//	@act3: offer ≔ offer ∖ {ic ↦ d}
+//	@act6: booked_appointment ≔ available_appointment ∪ {d ↦ ph}
+//	@act1: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+//	@act2: offer ≔ offer ∖ {ic ↦ d}
+//	@act3: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+//	@act4: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+end	
 
 //-----------------------------------------------------------------
 //event OfferAppointment
@@ -415,6 +652,10 @@ end
 //	then
 //	end
 
+//--------------------------------------------------------------------------
+
+
+
 
 event Login extends Login
 end
@@ -430,9 +671,417 @@ event AddPharmacy extends AddPharmacy
 end
 event AddMedicine extends AddMedicine
 end
-//event getPrescription extends getPrescription
+event initPrescription extends initPrescription
+end
+event getPrescription extends getPrescription
+end
+event UpdateAptNum extends UpdateAptNum
+end
+event GetClientName extends GetClientName
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//machine Booking
+//refines Pharmacy
+//sees BookingContext
+//
+//variables
+//	password
+//	registered
+//	current_user
+//	role
+//	
+//	pharmacies
+//	medicine
+//	medicine_qty
+//	client_name
+//	nric
+//	prescriptions
+////	medicine_info
+////	last_medicine_date
+//	pharmacy_stock
+//	appointment_num
+//	pres
+//	
+//	
+//	appointment
+//	phars
+//	offer
+//	booked
+//	booking
+//	accepted_booked
+//	rejected_booked
+////	client_ic
+//	available_appointment 
+//	booked_appointment
+//	accepted_appointment 
+//	rejected_appointment  
+//	
+////	client_appointment
+////	pharmacy_appointment_list
+//	
+//invariants
+//	@inv1: appointment ⊆ DATE
+//	@inv2: phars ⊆ PHARMACIES
+//	@inv3: pres ⊆ PRESCRIPTIONS
+//	@inv4: booked ⊆ NRIC
+//	@inv5: booking ⊆ appointment
+//	@inv6: accepted_booked ⊆ NRIC
+//	@inv7: rejected_booked ⊆ NRIC
+//	@inv8: prescriptions ∈ pres ⤔ ran(nric)
+//	@inv9: available_appointment ∈ appointment ⇸ PHARMACIES
+//	@inv10: booked_appointment ∈ appointment ⇸ PHARMACIES
+//	@inv11: offer ∈ booked ↔ appointment
+////	@inv9: offer ∈ booked ⤔ appointment
+//	@inv12: accepted_appointment ∈ accepted_booked ↔ booking
+//	@inv13: rejected_appointment ∈ rejected_booked ↔ appointment
+//	
+////	@inv4: client_ic ⊆ NRIC
+////	@inv6: prescriptions ∈ booked ⤖ pres
+////	@inv6: prescriptions ∈ booked ↔ pres
+////	@inv5: prescriptions ∈ NRIC ↔ pres
+////	@inv7: offer ∈ client_ic ⤖ available_appointment
+////	@inv6: offer ∈ NRIC ⤖ appointment
+////	@inv8: accepted_appointment ∈ booked ⤖ appointment	
+////	@inv4: client_ic ⊆ NRIC
+////	@inv5: client_appointment ∈ registered → appointment
+////	@inv6: accepted_appointment ∈ registered → appointment
+//
+//event INITIALISATION extends INITIALISATION
+//then
+//	@act11: appointment ≔ ∅
+//	@act12: phars ≔ ∅
+//	@act13: prescriptions ≔ ∅
+//	@act14: offer ≔ ∅ 
+//	@act15: booked ≔ ∅ 
+//	@act16: booking ≔ ∅
+//	@act17: accepted_booked ≔ ∅
+//	@act18: rejected_booked ≔ ∅ 
+//	@act19: pres ≔ ∅
+//	@act20: available_appointment ≔ ∅
+//	@act21: booked_appointment ≔ ∅
+//	@act22: accepted_appointment ≔ ∅
+//	@act23: rejected_appointment ≔ ∅
+//	
+//	//--------------------------------
+////	@act18: client_ic ≔ ∅
+//	
 //end
-event updateAptNum extends updateAptNum
-end
-event getClientName extends getClientName
-end
+//
+////event addDateToAppointment  // relate a date to every pharmacy appointment
+////any
+////	apt_num
+////	appointment
+////	available_appointment_date //date
+////	pharmacy //pharmacy name
+////	get_date
+////where
+////	@grd1: apt_num ∈ ℕ1
+////	@grd2: appointment ∈ dom(appointment_date)
+////	@grd3: available_appointment_date ∈ ran(appointment_date)
+////	@grd4: pharmacy ∈ ran(pharmacies)
+////	@grd5: {(available_appointment_date ↦ appointment_num)} ↦ pharmacy ∉ pharmacy_appointment_list
+////	@grd6: get_date ∈ dom(pharmacy_appointment_list)
+////	@grd7: available_appointment_date ∉ dom(pharmacy_apppointment_num)
+////then
+////	@act1: appointment_num(pharmacy) ≔ apt_num
+////	@act1: pharmacy_appointment_list ≔ pharmacy_appointment_list ∪ {{(appointment_date ↦ appointment_num)} ↦ pharmacy}
+////end
+//
+//
+////
+////event CreateDate
+////any
+////	dt
+////where
+////	@grd1: dt ∉ date
+////	@grd2: card(pharmacies) ≥ 1
+////then
+////	@act1: date ≔ date ∪ {dt}
+////end
+//	
+//
+//event BookAppointment
+//any 
+//	ic
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∉ booked
+//	@grd4: ic ∉ accepted_booked
+//	@grd5: ic ∈ ran(nric)
+//	@grd6: ic ∈ ran({current_user} ◁ nric)
+////	@grd2: ic ∈ ran(nric)
+////	@grd3: prescription = no_prescription
+////	@grd4: date = no_date
+//then
+//	@act1: booked ≔ booked ∪ {ic}
+//end
+//
+//event CreateNewPrescription
+//any 
+//	p
+//	ic
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd7: p ∉ pres
+//	@grd9: ic ∉ ran(prescriptions)
+////	@grd8: p ↦ ic ∉ prescriptions	
+//then 
+//	@act2: pres ≔ pres ∪ {p}
+//	@act1: prescriptions ≔ prescriptions ∪ {p ↦ ic}
+//end
+//
+//event CreateUpdatedPrescription
+//any 
+//	p
+//	ic
+//	updated_p
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ accepted_booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: updated_p ∉ pres
+//	@grd6: updated_p ≠ p
+//	@grd7: p ∈ pres
+//	@grd8: p ↦ ic ∈ prescriptions	
+//then 
+//	@act2: pres ≔ (pres ∖ {p}) ∪ {updated_p}
+//	@act1: prescriptions ≔ (prescriptions ∖ {p ↦ ic}) ∪ {updated_p ↦ ic}
+//end
+//
+////event OfferAppointment
+////any p ic d
+////where
+////	@grd1: role(current_user) ∈ {Admin, Staff}
+////	@grd2: current_user ≠ no_user
+////	@grd3: p ∈ pres
+////	@grd4: ic ∈ booked
+////	@grd5: ic ↦ p ∈ prescriptions
+////	@grd6: d ∉ appointment
+////	@grd7: ic ↦ d ∉ offer
+////then
+////	@act1: offer ≔ offer ∪ {ic ↦ d}	
+////end
+//
+//
+//event CreateAvailableAppointment
+//any d ph apt_created apt_num 
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+////	@grd3: ph ∈ ran({current_user} ◁ pharmacies)
+//	@grd3:ph ∈ ran (pharmacies)
+//	@grd4: d ∉ appointment
+////	@grd5: d ∉ booking
+//	@grd6: d ↦ ph ∉ available_appointment
+//	@grd7: apt_created = card(available_appointment ▷ {ph})
+//	@grd8: apt_num = appointment_num(ph)
+//	@grd9: apt_created ≤ apt_num − 1
+//then
+//	@act1:appointment ≔ appointment ∪ {d}
+//	@act2:available_appointment ≔ available_appointment ∪ {d ↦ ph}
+//end
+//
+////-----------------------------------------------------------------
+//event OfferAppointment
+//any p ic d ph 
+//where
+//	@grd1: role(current_user) ∈ {Admin, Staff}
+//	@grd2: current_user ≠ no_user
+//	@grd3: p ∈ pres
+//	@grd4: ic ∈ booked
+//	@grd5: ic ∉ dom(offer)
+//	@grd6: ic ∈ ran(nric)
+//	@grd7: d ∉ ran({ic} ◁ rejected_appointment) 
+//	@grd8: p ↦ ic ∈ prescriptions
+//	@grd9: d ∈ appointment
+//	@grd10: ph ∈ ran (pharmacies)
+////	@grd7: of_d ∉ appointment
+//	@grd11: ic ↦ d ∉ offer
+//	@grd12: d ↦ ph ∈ available_appointment
+//then
+//	@act1: offer ≔ offer ∪ {ic ↦ d}	
+//end
+//
+//event getOfferedAppointment
+//any result ic p d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: p ∈ pres
+//	@grd6: d ∈ booking
+//	@grd7: ph ∈ ran (pharmacies)
+//	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∉ accepted_appointment
+//	@grd10: d ↦ ph ∈ available_appointment 
+//	@grd11: result = ({ic} ◁ offer)
+//end
+//
+//event AcceptAppointment
+//any 
+//	ic d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ ran({ic} ◁ offer)
+//	@grd6: ph ∈ ran({d} ◁ available_appointment)
+////	@grd5: d ∈ ran(offer)
+////	@grd6: d ∉ booking
+////	@grd7: ph ∈ ran(pharmacies)
+////	@grd8: ic ↦ d ∈ offer
+////	@grd9: d ↦ ph ∈ available_appointment 
+////	@grd10: ic ↦ d ∉ accepted_appointment
+//	
+//then
+//	@act1: booked ≔ booked ∖ {ic}
+//	@act2: accepted_booked ≔ accepted_booked ∪ {ic}
+//	@act3: booking ≔ booking ∪ {d}
+//	@act4: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+//	@act5: offer ≔ offer ∖ {ic ↦ d}
+//	@act6: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+//	@act7: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+////	@act8: rejected_appointment ≔ {ic} ⩤ rejected_appointment
+//	
+//end
+//
+//event RejectAppointment
+//any ic d
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ appointment
+//	@grd6: d ∉ booking
+//	@grd7: d ∈ ran({ic} ◁ offer)
+//	
+//	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∉ accepted_appointment
+//	@grd10: ic ↦ d ∉ rejected_appointment
+//	
+//then
+//	@act1: booked ≔ booked ∖ {ic}
+//	@act2: rejected_booked ≔ rejected_booked ∪ {ic}
+////	@act1: booking ≔ booking ∪ {d}
+//	@act3: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+//	@act4: offer ≔ offer ∖ {ic ↦ d}
+//	
+//	
+//end
+//
+//event ViewAppointment
+//any result ic d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	@grd3: ic ∈ accepted_booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ booking
+//	@grd6: d ∈ ran({ic} ◁ accepted_appointment)
+//	@grd7: ph ∉ ran({d} ◁ available_appointment)
+//	@grd8: ph ∈ ran({d} ◁ booked_appointment)
+//	
+////	@grd6: ph ∈ ran (pharmacies)
+////	@grd8: ic ↦ d ∈ offer
+//	@grd9: ic ↦ d ∈ accepted_appointment
+//	@grd10: d ↦ ph ∉ available_appointment 
+//	@grd11: result = ({ic} ◁ accepted_appointment)
+//end
+//	
+//	
+////any result ic p d ph
+////where
+////	@grd1: role(current_user) = Client
+////	@grd2: current_user ≠ no_user
+////	@grd3: ic ∈ booked
+////	@grd4: ic ∈ ran(nric)
+////	@grd5: p ∈ pres
+////	@grd6: d ∈ booking
+////	@grd7: ph ∈ ran (pharmacies)
+////	@grd8: ic ↦ d ∈ offer
+////	@grd9: ic ↦ d ∉ accepted_appointment
+////	@grd10: d ↦ ph ∈ available_appointment 
+////	@grd11: result = ({ic} ◁ offer)
+//
+//event RebookAppointment
+//any ic d ph
+//where
+//	@grd1: role(current_user) = Client
+//	@grd2: current_user ≠ no_user
+//	
+//	@grd3: ic ∈ accepted_booked
+//	@grd4: ic ∈ ran(nric)
+//	@grd5: d ∈ booking
+//	@grd6: ph ∉ ran({d} ◁ available_appointment)
+//	@grd10: ph ∈ ran({d} ◁ booked_appointment)
+//	@grd7: ic ↦ d ∉ offer
+//	@grd8: ic ↦ d ∈ accepted_appointment
+//	@grd9: ic ↦ d ∉ rejected_appointment
+////	@grd5: d ∈ appointment
+////	@grd3: ic ∈ booked 
+////	@grd4: d ∈ booking
+////	@grd5: ph ∈ ran(pharmacies)
+////	@grd6: d ↦ ph ∉ available_appointment 
+////	@grd7: d ↦ ph ∈ booked_appointment
+////	@grd8: ic ↦ d ∉ offer
+////	@grd9: ic ↦ d ∈ accepted_appointment
+////	@grd10: ic ↦ d ∉ rejected_appointment
+////	@grd11: d = accepted_appointment(ic)
+////	@grd12: ph = available_appointment(d)
+//then
+//	@act1: appointment ≔ appointment ∪ {d}
+//	@act2: booking ≔ booking ∖ {d}
+//	@act3: booked ≔ booked ∪ {ic}
+//	@act4: accepted_booked ≔ accepted_booked ∖ {ic}
+//	@act5: rejected_booked  ≔ rejected_booked ∪ {ic}
+//	@act6: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+//	@act7: accepted_appointment ≔ accepted_appointment ∖ {ic ↦ d}
+//	@act8: available_appointment ≔ available_appointment ∪ {d ↦ ph}
+//	@act9: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
+////	@act3: offer ≔ offer ∖ {ic ↦ d}
+////	@act6: booked_appointment ≔ available_appointment ∪ {d ↦ ph}
+////	@act1: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+////	@act2: offer ≔ offer ∖ {ic ↦ d}
+////	@act3: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+////	@act4: available_appointment ≔ available_appointment ∖ {d ↦ ph}
+//end	
