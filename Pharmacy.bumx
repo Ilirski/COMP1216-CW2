@@ -77,10 +77,9 @@ any
 	pharmacy
 	apt_num
 where
-	@does-pharmacy-exist: pharmacy ∈ PHARMACIES ∧ pharmacy ∉ ran(pharmacies)
-	@check-logged-in: current_user ≠ no_user
-	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+	@is-admin: current_user ↦ Admin ∈ role
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
+	@does-pharmacy-exist: pharmacy ∉ ran(pharmacies)
 	@is-pharmacy-available: pharmacy ∉ dom(appointment_num)
 then 
 	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
@@ -95,12 +94,11 @@ any
 	batch
 	qty
 where
-	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
+	@is-admin: current_user ↦ Admin ∈ role
 	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
-	@does-batch-exist: batch ∈ BATCH_NUM ∧ batch ∉ dom(medicine)
+	@does-batch-exist: batch ∉ dom(medicine)
 	@check-medicine-name: medicine_name ∈ MEDICINE_NAME
 	@is-qty-positive-integer: qty ∈ ℕ1
-	@not-null: current_user ≠ no_user
 then
 	@add-stock-to-pharmacy: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
 	@add-medicine-name-to-batch: medicine ≔ medicine ∪ {batch ↦ medicine_name}
@@ -109,32 +107,52 @@ end
 
 /*An Administrator or Staff can initialise a prescription*/
 /*The initialised prescription is added to a Client's list of prescriptions*/
+//event InitPrescription
+//any 
+//	ic
+//	batch_num
+//	pres
+//where
+//	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
+//	@does-batch-num-exist: batch_num ∈ dom(medicine)
+//	@does-nric-exist: ic ∈ ran(nric)
+//	@check-user-prescription: ic ∉ dom(prescriptions)
+//	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+//then 
+//	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+//	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+//end
 
+/* REQ 13:  A client can retrieve their prescriptions from the system. */
+
+/* Any administrator can update information about the pharmacy */
+/* Updates include number of available appointments for pickup of medicine packets per day */
+
+
+//---------------------------------------------------------------------------------
 event InitPrescription
 any 
 	ic
 	batch_num
 	pres
 where
-	@does-current-user-have-role: current_user ∈ dom(role)
-	@is-user-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@does-batch-num-exist: batch_num ∈ dom(medicine)
-	@does-nric-exist: ic ∈ ran(nric)
-	@check-user-prescription: ic ∉ dom(prescriptions)
-	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
+	@grd2: batch_num ∈ dom(medicine)
+	@grd3: ic ∈ ran(nric)
+	@grd4: ic ∉ dom(prescriptions)
+	@grd5: pres ∈ PRESCRIPTIONS
+	@grd: pres ∉ ran(prescriptions)
 then 
-	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
-	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+	@act1:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+	@act2: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-
-event getPrescription
+event GetPrescription
 any
 	result
 where
-	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
-	@not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@current-user-has-nric: current_user ∈ dom(nric)
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
@@ -146,9 +164,7 @@ any
 	ic
 	result
 where 
-	@check-user-registered: current_user ∈ registered
-	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@not-null: current_user ≠ no_user
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
 	@does-nric-exist: ic ∈ ran(nric)
 	@get-client-name: result = client_name[{ic}]
 end	
@@ -160,8 +176,7 @@ any
 	pharmacy
 	apt_num
 where
-	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
-	@not-null: current_user ≠ no_user
+	@is-admin: current_user ↦ Admin ∈ role
 	@is-admin-authorized: pharmacy ∈ ran({current_user} ◁ pharmacies)
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then
@@ -232,9 +247,9 @@ any
 	ic
 	name
 where 
-	@is-nric-unique: ic ∈ NRIC ∧ ic ∉ ran(nric)
-	@is-client-name-unique: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
-	@no-nric-belongs-to-new-user: new_user ∈ USER ∧ new_user ∉ dom(nric)
+	@is-nric-unique: ic ∉ ran(nric) ∧ ic ∉ dom(client_name)
+	@is-client-name-unique: name ∈ USER_NAME
+	@no-nric-belongs-to-new-user: new_user ∉ dom(nric)
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
 	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}

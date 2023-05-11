@@ -87,11 +87,11 @@ invariants
 			new_role
 			new_pass
 		where
-			@new-user-not-registered: new_user ∈ USER ∧ new_user ∉ registered
+			@new-user-not-registered: new_user ∉ registered
+			@is-admin: current_user ↦ Admin ∈ role
 			@new-user-not-null: new_user ≠ no_user
 			@new-role-admin-or-staff: new_role ∈ {Admin, Staff}
 			@typeof-pass: new_pass ∈ PASSWORD
-			@is-admin: current_user ↦ Admin ∈ role ∪ {new_user ↦ Admin}
 		then
 			@register-user: registered ≔ registered ∪ {new_user}
 			@assign-role: role ≔ role ∪ {new_user ↦ new_role}

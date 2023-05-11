@@ -67,12 +67,12 @@ end
 event CreateAvailableAppointment
 any d ph apt_created apt_num 
 where
-	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@is-not-null: current_user ≠ no_user
-	@does-pharmacy-exist: ph ∈ ran (pharmacies)
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
+	@does-pharmacy-exist: ph ∈ ran(pharmacies)
 	@does-day-have-appt: d ∉ appointment
 	@check-pharmacy-have-available-appt: d ↦ ph ∉ available_appointment
 	@check-appt-count: apt_created = card(available_appointment ▷ {ph})
+	@is-ph-in-apt-num: ph ∈ dom(appointment_num)
 	@check-pharmacy-apt-num: apt_num = appointment_num(ph)
 	@is-apt-create-num-valid: apt_created ≤ apt_num − 1
 then
@@ -86,7 +86,7 @@ event BookAppointment
 any 
 	ic
 where
-	@is-Client: role(current_user) = Client
+	@is-client: current_user ↦ Client ∈ role
 	@is-not-null: current_user ≠ no_user
 	@is-not-booked: ic ∉ booked
 	@has-no-accept-booked: ic ∉ accepted_booked
@@ -101,8 +101,7 @@ end
 event OfferAppointment
 any p ic d ph 
 where
-	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@is-not-null: current_user ≠ no_user
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
 	@does-prescription-exist: p ∈ ran(prescriptions)
 	@did-client-book-appt: ic ∈ booked
 	@does-ic-exist: ic ∈ ran(nric)
@@ -121,8 +120,7 @@ end
 event getOfferedAppointment
 any result ic p d ph
 where
-	@is-user-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@did-client-book: ic ∈ booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-prescription-exist: p ∈ dom(prescriptions)
@@ -140,8 +138,7 @@ event AcceptAppointment
 any 
 	ic d ph
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@did-client-book: ic ∈ booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
@@ -160,8 +157,7 @@ end
 event RejectAppointment
 any ic d
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@did-client-book: ic ∈ booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-appt-exist: d ∈ appointment
@@ -182,8 +178,7 @@ end
 event ViewAppointment
 any result ic d ph
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@check-client-accepted: ic ∈ accepted_booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-appt-exist-in-booking: d ∈ booking
@@ -201,8 +196,7 @@ end
 event RebookAppointment
 any ic d ph
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@did-client-accept-appt: ic ∈ accepted_booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-appt-exist: d ∈ booking
@@ -227,12 +221,10 @@ end
 event AbandonSystem
 any ic
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
+	@is-client: current_user ↦ Client ∈ role
+	@grd3: ic ∈ booked	
 	@grd4: ic ∉ accepted_booked 
-	@grd5: ic ∉ rejected_booked 
-	
+	@grd5: ic ∉ rejected_booked
 //	@grd4: ic ∈ ran(nric)
 	@grd6: ic ∈ ran({current_user} ◁ nric)
 	@grd7: ic ∉ dom(offer)
@@ -244,8 +236,7 @@ end
 event AbandonAppointment
 any ic d
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@grd3: ic ∈ booked	
 	@grd5: ic ∈ ran({current_user} ◁ nric)
 	@grd6: d ∈ appointment
@@ -306,7 +297,7 @@ event AddMedicine extends AddMedicine
 end
 event InitPrescription extends InitPrescription
 end
-event getPrescription extends getPrescription
+event GetPrescription extends GetPrescription
 end
 event UpdateAptNum extends UpdateAptNum
 end
