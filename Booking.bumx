@@ -17,6 +17,7 @@ variables
 	nric
 	prescriptions
 	medicine_info
+//	received_medicine_info
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
@@ -64,19 +65,7 @@ end
 
 //-----------------------------------------------------------------
 
-event BookAppointment
-any 
-	ic
-where
-	@is-client: current_user ↦ Client ∈ role
-	@is-not-booked: ic ∉ booked
-	@has-no-accept-booked: ic ∉ accepted_booked
-	@does-ic-exist: ic ∈ ran(nric)
-	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
-then
-	@book-appt: booked ≔ booked ∪ {ic}
-end
-
+/*	REQ16: Staff or Admin can create appointment if pharmacy exists */
 event CreateAvailableAppointment
 any d ph apt_created apt_num 
 where
@@ -93,6 +82,24 @@ then
 	@add-available-appt-to-pharmacy:available_appointment ≔ available_appointment ∪ {d ↦ ph}
 end
 
+/*REQ19: Client can book appointment if they have a prescription */
+/*REQ24: The booking is stopped if there are no more available appointments within the 7 days from the date of login to the appointment offer. */
+event BookAppointment
+any 
+	ic
+where
+	@is-Client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@is-not-booked: ic ∉ booked
+	@has-no-accept-booked: ic ∉ accepted_booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
+then
+	@book-appt: booked ≔ booked ∪ {ic}
+end
+
+/*REQ20: Staff or Admin can offer appointment to Client */
+/*If Client is registered and has prescription, pharmacy has appointment, offer is available */
 event OfferAppointment
 any p ic d ph 
 where
@@ -110,6 +117,8 @@ then
 	@offer-client-appt: offer ≔ offer ∪ {ic ↦ d}	
 end
 
+/*REQ20: Client can view offered available appointment */
+/*Client's IC relates to available appointment of any pharmacy */
 event getOfferedAppointment
 any result ic p d ph
 where
@@ -117,7 +126,7 @@ where
 	@did-client-book: ic ∈ booked
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-prescription-exist: p ∈ dom(prescriptions)
-	@is-appt-in-booking: d ∈ booking
+	@is-appt-in-booking: d ∈ ran(offer)
 	@does-pharmacy-exist: ph ∈ ran (pharmacies)
 	@check-client-offer: ic ↦ d ∈ offer
 	@check-client-accept-appt: ic ↦ d ∉ accepted_appointment
@@ -125,6 +134,8 @@ where
 	@get-offer: result = ({ic} ◁ offer)
 end
 
+/*Client can accept appointment once he/she confirms appointment */
+/*REQ22: A client is offered the earliest available appointment at any pharmacy */
 event AcceptAppointment
 any 
 	ic d ph
@@ -144,6 +155,7 @@ then
 	@remove-apt-from-pharmacy: available_appointment ≔ available_appointment ∖ {d ↦ ph}
 end
 
+/*REQ21: If the client rejects the current offer, the system offers the following earliest appointment, that might be at a different pharmacy. */
 event RejectAppointment
 any ic d
 where
@@ -164,6 +176,7 @@ then
 	@remove-client-offer: offer ≔ offer ∖ {ic ↦ d}
 end
 
+/*REQ25: A client can view their current booking */
 event ViewAppointment
 any result ic d ph
 where
@@ -179,6 +192,9 @@ where
 	@get-appt: result = ({ic} ◁ accepted_appointment)
 end
 
+/*REQ26: Rebooking an appointment can be done up to 1 day before the date of the original one*/
+/*REQ27: Rebooking follows the same rules as booking. */
+/*REQ28: After re-booking is confirmed, the original appointment becomes available */
 event RebookAppointment
 any ic d ph
 where
@@ -203,6 +219,42 @@ then
 	@remove-appt-as-booked: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
 end	
 
+/*REQ23: At any point during the booking process, the client can abandon the system without completing the booking */
+event AbandonSystem
+any ic
+where
+	@grd1: role(current_user) = Client
+	@grd2: current_user ≠ no_user
+	@grd3: ic ∈ booked	
+//	@grd4: ic ∈ ran(nric)
+	@grd4: ic ∈ ran({current_user} ◁ nric)
+	@grd5: ic ∉ dom(offer)
+then
+	@act1: booked ≔ booked ∖ {ic}
+end
+
+/*REQ23: At any point during the booking process, the client can abandon the system without completing the booking */
+event AbandonAppointment
+any ic d
+where
+	@grd1: role(current_user) = Client
+	@grd2: current_user ≠ no_user
+	@grd3: ic ∈ booked	
+	@grd4: ic ∈ ran({current_user} ◁ nric)
+	@grd5: d ∈ appointment
+	@grd6: d ∉ booking
+	@grd7: d ∈ ran({ic} ◁ offer)
+	@grd8: ic ↦ d ∈ offer
+	@grd9: ic ↦ d ∉ accepted_appointment
+	@grd10: ic ↦ d ∉ rejected_appointment 
+then
+	@act1: booked ≔ booked ∖ {ic}
+	@act4: offer ≔ offer ∖ {ic ↦ d}
+end
+
+//event ReceiveMedicine
+//any
+//where
 //-----------------------------------------------------------------------------
 
 event Login extends Login
@@ -219,11 +271,15 @@ event AddPharmacy extends AddPharmacy
 end
 event AddMedicine extends AddMedicine
 end
-event InitPrescription extends InitPrescription
+event initPrescription extends initPrescription
 end
-event GetPrescription extends GetPrescription
+event getPrescription extends getPrescription
 end
 event UpdateAptNum extends UpdateAptNum
 end
 event GetClientName extends GetClientName
 end
+//event appendPrescription extends appendPrescription
+//end
+//event updatePrescription extends updatePrescription
+//end
