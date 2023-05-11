@@ -74,7 +74,7 @@ where
 	@check-logged-in: current_user ≠ no_user
 	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
-	@pharmacy-not-in-appointment-num-domain: pharmacy ∉ dom(appointment_num)
+	@is-pharmacy-available: pharmacy ∉ dom(appointment_num)
 then 
 	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
 	@add-apt-num: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
@@ -102,7 +102,7 @@ end
 
 /*An Administrator or Staff can initialise a prescription*/
 /*The initialised prescription is added to a Client's list of prescriptions*/
-event initPrescription
+event InitPrescription
 any 
 	ic
 	batch_num
@@ -119,9 +119,9 @@ then
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-event getPrescription
+event GetPrescription
 any
-	 result
+	result
 where
 	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
 	@not-null: current_user ≠ no_user
@@ -173,9 +173,9 @@ any
 	ic
 	name
 where 
-	@does-nric-exist: ic ∈ NRIC ∧ ic ∉ ran(nric)
-	@does-client-name-exist: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
-	@does-new-user-exist: new_user ∈ USER ∧ new_user ∉ dom(nric)
+	@is-nric-unique: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@is-client-name-unique: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
+	@does-new-user-have-nric: new_user ∈ USER ∧ new_user ∉ dom(nric)
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
 	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
