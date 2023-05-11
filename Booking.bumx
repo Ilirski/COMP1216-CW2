@@ -88,7 +88,7 @@ event BookAppointment
 any 
 	ic
 where
-	@is-Client: role(current_user) = Client
+	@is-client: current_user ↦ Client ∈ role
 	@is-not-null: current_user ≠ no_user
 	@is-not-booked: ic ∉ booked
 	@has-no-accept-booked: ic ∉ accepted_booked
@@ -223,8 +223,7 @@ end
 event AbandonSystem
 any ic
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@grd3: ic ∈ booked	
 //	@grd4: ic ∈ ran(nric)
 	@grd4: ic ∈ ran({current_user} ◁ nric)
@@ -237,8 +236,7 @@ end
 event AbandonAppointment
 any ic d
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@grd3: ic ∈ booked	
 	@grd4: ic ∈ ran({current_user} ◁ nric)
 	@grd5: d ∈ appointment
