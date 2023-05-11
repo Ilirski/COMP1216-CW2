@@ -3,11 +3,13 @@ refines Pharmacy
 sees BookingContext
 
 variables
+	//User variables
 	password
 	registered
 	current_user
 	role
 	
+	//Pharmacy variables
 	pharmacies
 	medicine
 	medicine_qty
@@ -20,6 +22,7 @@ variables
 	pharmacy_stock
 	appointment_num
 	
+	//Booking variables
 	appointment
 	phars
 	offer

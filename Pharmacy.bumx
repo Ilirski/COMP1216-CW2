@@ -32,7 +32,7 @@ invariants
 	
 	 /* Each batch of medicine will has its own quantity of stock */
 	 /* The stock only can be one integer number [0, ∞) */
-	@typeof-medicineqty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+	@typeof-medicine-qty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
 	
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
@@ -85,7 +85,6 @@ invariants
 //	/* REQ 16: A pharmacy has a daily number of appointments. */
 //	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
 
-
 event INITIALISATION extends INITIALISATION
 then
 //	@act-init-pharmacies: pharmacies ≔ ∅
@@ -122,6 +121,7 @@ where
 	@check-logged-in: current_user ≠ no_user
 	@is-registered-admin: current_user ∈ registered ∧ role(current_user) = Admin
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
+	@is-pharmacy-available: pharmacy ∉ dom(appointment_num)
 then 
 	@add-pharmacy-with-user: pharmacies ≔ pharmacies ∪ {current_user ↦ pharmacy}
 	@add-apt-num: appointment_num ≔ appointment_num ∪ {pharmacy ↦ apt_num}
@@ -145,6 +145,25 @@ then
 	@add-stock-to-pharmacy: pharmacy_stock ≔ pharmacy_stock ∪ {pharmacy ↦ batch}
 	@add-medicine-name-to-batch: medicine ≔ medicine ∪ {batch ↦ medicine_name}
 	@add-qty-to-batch: medicine_qty ≔ {batch ↦ qty}
+end
+
+/*An Administrator or Staff can initialise a prescription*/
+/*The initialised prescription is added to a Client's list of prescriptions*/
+event InitPrescription
+any 
+	ic
+	batch_num
+	pres
+where
+	@does-current-user-have-role: current_user ∈ dom(role)
+	@is-user-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@does-batch-num-exist: batch_num ∈ dom(medicine)
+	@does-nric-exist: ic ∈ ran(nric)
+	@check-user-prescription: ic ∉ dom(prescriptions)
+	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+then 
+	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
@@ -182,10 +201,11 @@ end
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
 event getPrescription
 any
-	 result
+	result
 where
 	@is-registered-client: current_user ∈ registered ∧ role(current_user) = Client
 	@not-null: current_user ≠ no_user
+	@current-user-has-nric: current_user ∈ dom(nric)
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
 
@@ -282,8 +302,9 @@ any
 	ic
 	name
 where 
-	@does-nric-exist: ic ∈ NRIC ∧ ic ∉ ran(nric)
-	@is-name-username: name ∈ USER_NAME
+	@is-nric-unique: ic ∈ NRIC ∧ ic ∉ ran(nric)
+	@is-client-name-unique: name ∈ USER_NAME ∧ ic ∉ dom(client_name)
+	@no-nric-belongs-to-new-user: new_user ∈ USER ∧ new_user ∉ dom(nric)
 then 
 	@add-nric-to-user: nric ≔ nric ∪ {new_user ↦ ic}
 	@add-name-to-user: client_name ≔ client_name ∪ {ic ↦ name}
