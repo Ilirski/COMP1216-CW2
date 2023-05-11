@@ -3,13 +3,11 @@ refines Pharmacy
 sees BookingContext
 
 variables
-	//User variables
 	password
 	registered
 	current_user
 	role
 	
-	//Pharmacy variables
 	pharmacies
 	medicine
 	medicine_qty
@@ -18,11 +16,11 @@ variables
 	prescriptions
 	medicine_info
 //	received_medicine_info
+	received_batch_num
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
 	
-	//Booking variables
 	appointment
 	phars
 	offer
@@ -149,7 +147,7 @@ where
 	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
 	@does-appt-in-pharmacy-exist: ph ∈ ran({d} ◁ available_appointment)	
 then
-	@remove-client-from-pending: booked ≔ booked ∖ {ic}
+//	@remove-client-from-pending: booked ≔ booked ∖ {ic}
 	@add-client-to-accepted: accepted_booked ≔ accepted_booked ∪ {ic}
 	@add-appt-to-booking-list: booking ≔ booking ∪ {d}
 	@add-appt-to-accept: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
@@ -231,10 +229,13 @@ any ic
 where
 	@grd1: role(current_user) = Client
 	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked	
+	@grd3: ic ∈ booked
+	@grd4: ic ∉ accepted_booked 
+	@grd5: ic ∉ rejected_booked 
+	
 //	@grd4: ic ∈ ran(nric)
-	@grd4: ic ∈ ran({current_user} ◁ nric)
-	@grd5: ic ∉ dom(offer)
+	@grd6: ic ∈ ran({current_user} ◁ nric)
+	@grd7: ic ∉ dom(offer)
 then
 	@act1: booked ≔ booked ∖ {ic}
 end
@@ -246,21 +247,47 @@ where
 	@grd1: role(current_user) = Client
 	@grd2: current_user ≠ no_user
 	@grd3: ic ∈ booked	
-	@grd4: ic ∈ ran({current_user} ◁ nric)
-	@grd5: d ∈ appointment
-	@grd6: d ∉ booking
-	@grd7: d ∈ ran({ic} ◁ offer)
-	@grd8: ic ↦ d ∈ offer
-	@grd9: ic ↦ d ∉ accepted_appointment
-	@grd10: ic ↦ d ∉ rejected_appointment 
+	@grd5: ic ∈ ran({current_user} ◁ nric)
+	@grd6: d ∈ appointment
+	@grd7: d ∉ booking
+	@grd8: d ∈ ran({ic} ◁ offer)
+	@grd9: ic ↦ d ∈ offer
+	@grd10: ic ↦ d ∉ accepted_appointment
+	@grd11: ic ↦ d ∉ rejected_appointment
 then
 	@act1: booked ≔ booked ∖ {ic}
 	@act4: offer ≔ offer ∖ {ic ↦ d}
 end
 
-//event ReceiveMedicine
-//any
-//where
+event ReceiveMedicine
+any ic p d ph batch_num stock_created med_gave_away
+where
+	@is-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@grd1: ic ∈ booked
+	@check-client-accepted: ic ∈ accepted_booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-appt-exist-in-booking: d ∈ booking
+	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
+	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
+	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
+	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
+	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
+//	@get-appt: result = ({ic} ◁ accepted_appointment)
+	@grd2: p ∈ ran(prescriptions)
+	@grd3: batch_num ∉ ran(received_batch_num)
+	@grd4: batch_num = medicine_info(p)
+	@grd8: stock_created ∈ ℕ1
+	@grd9: med_gave_away ∈ ℕ1
+	@grd5: stock_created = medicine_qty(batch_num)
+	@grd6: med_gave_away = card(medicine_info ▷ {batch_num})
+	@grd7: stock_created ≥ med_gave_away
+then
+	@act1: booked ≔ booked ∖ {ic}
+	@act2: received_batch_num ≔ received_batch_num ∪ {p ↦ batch_num}
+	@act3: medicine_info ≔ medicine_info ∖ {p ↦ batch_num}
+	@act4: medicine_qty(batch_num) ≔ (stock_created − med_gave_away)
+end
 //-----------------------------------------------------------------------------
 
 event Login extends Login
@@ -277,7 +304,7 @@ event AddPharmacy extends AddPharmacy
 end
 event AddMedicine extends AddMedicine
 end
-event initPrescription extends initPrescription
+event InitPrescription extends InitPrescription
 end
 event getPrescription extends getPrescription
 end
