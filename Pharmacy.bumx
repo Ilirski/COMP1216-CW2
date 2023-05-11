@@ -19,9 +19,9 @@ variables
 	pharmacy_stock
 	appointment_num
 	
-	
 invariants
-	 /* An admin can register multiple pharmacies */
+
+	/* An admin can register multiple pharmacies */
 	@typeof-pharmacies: pharmacies ∈ USER ↔ PHARMACIES
 	
 	 /* REQ 10 : */
@@ -36,7 +36,7 @@ invariants
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
 	@typeof-nric: nric ∈ USER ⤔ NRIC
-	@typeof-prescriptions-list: prescriptions ∈ NRIC ↔ PRESCRIPTIONS
+	@typeof-prescriptions-list: prescriptions ∈ NRIC ⤔ PRESCRIPTIONS
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
@@ -49,7 +49,6 @@ invariants
 	
 	/* REQ 16: A pharmacy has a daily number of appointments. */
 	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
-
 
 event INITIALISATION extends INITIALISATION
 then
@@ -101,8 +100,26 @@ then
 	@add-qty-to-batch: medicine_qty ≔ {batch ↦ qty}
 end
 
+/*An Administrator or Staff can initialise a prescription*/
+/*The initialised prescription is added to a Client's list of prescriptions*/
+event initPrescription
+any 
+	ic
+	batch_num
+	pres
+where
+	@is-user-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@does-batch-num-exist: batch_num ∈ dom(medicine)
+	@does-nric-exist: ic ∈ ran(nric)
+	@check-user-prescription: ic ∉ dom(prescriptions)
+	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+then 
+	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+end
+
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-event GetPrescription
+event getPrescription
 any
 	 result
 where
@@ -111,6 +128,20 @@ where
 	@current-user-has-nric: current_user ∈ dom(nric)
 	@get-client-prescription: result = ran({nric(current_user)} ◁ prescriptions)
 end
+
+/* REQ 18:  An administrator or a staff can view the client’s details using their 
+ * NRIC (MyKad) number. */
+event GetClientName
+any 
+	ic
+	result
+where 
+	@check-user-registered: current_user ∈ registered
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@not-null: current_user ≠ no_user
+	@does-nric-exist: ic ∈ ran(nric)
+	@get-client-name: result = client_name[{ic}]
+end	
 
 /* Any administrator can update information about the pharmacy */
 /* Updates include number of available appointments for pickup of medicine packets per day */
@@ -126,20 +157,6 @@ where
 then
 	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
 end 
-
-/* REQ 18:  An administrator or a staff can view the client’s details using their 
- * NRIC (MyKad) number. */
-event GetClientName
-any 
-	ic
-	result
-where 
-	@check-user-registered: current_user ∈ registered
-	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
-	@not-null: current_user ≠ no_user
-	@does-nric-exist: ic ∈ ran(nric)
-	@get-client-name: result = client_name[{ic}]
-end	
 
 event Login extends Login
 end

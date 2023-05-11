@@ -3,418 +3,214 @@ refines Pharmacy
 sees BookingContext
 
 variables
+	//User variables
 	password
 	registered
 	current_user
 	role
 	
+	//Pharmacy variables
 	pharmacies
 	medicine
 	medicine_qty
 	client_name
 	nric
 	prescriptions
-//	medicine_info
-//	last_medicine_date
+	medicine_info
+	last_medicine_date
 	pharmacy_stock
 	appointment_num
-	pres
 	
-	
+	//Booking variables
 	appointment
 	phars
 	offer
 	booked
 	booking
 	accepted_booked
-//	client_ic
+	rejected_booked
 	available_appointment 
 	booked_appointment
 	accepted_appointment 
 	rejected_appointment  
 	
-//	client_appointment
-//	pharmacy_appointment_list
-	
 invariants
-	@inv1: appointment ⊆ DATE
-	@inv2: phars ⊆ PHARMACIES
-	@inv3: pres ⊆ PRESCRIPTIONS
-	@inv4: booked ⊆ NRIC
-	@inv5: booking ⊆ appointment
-	@inv6: accepted_booked ⊆ NRIC 
-	@inv7: prescriptions ∈ pres ⤔ ran(nric)
-	@inv8: available_appointment ∈ appointment ⇸ PHARMACIES
-	@inv9: booked_appointment ∈ appointment ⇸ PHARMACIES
-	@inv10: offer ∈ booked ⤔ appointment
-//	@inv9: offer ∈ booked ⤔ appointment
-	@inv11: accepted_appointment ∈ accepted_booked ⤔ booking
-	@inv12: rejected_appointment ∈ booked ⤔ appointment
-	
-//	@inv4: client_ic ⊆ NRIC
-//	@inv6: prescriptions ∈ booked ⤖ pres
-//	@inv6: prescriptions ∈ booked ↔ pres
-//	@inv5: prescriptions ∈ NRIC ↔ pres
-//	@inv7: offer ∈ client_ic ⤖ available_appointment
-//	@inv6: offer ∈ NRIC ⤖ appointment
-//	@inv8: accepted_appointment ∈ booked ⤖ appointment	
-//	@inv4: client_ic ⊆ NRIC
-//	@inv5: client_appointment ∈ registered → appointment
-//	@inv6: accepted_appointment ∈ registered → appointment
+	@typeof-appointment: appointment ⊆ DATE
+	@typeof-pharmacy: phars ⊆ PHARMACIES
+	@typeof-client-booked: booked ⊆ NRIC
+	@typeof-booked-appt: booking ⊆ appointment
+	@typeof-accept-client: accepted_booked ⊆ NRIC 
+	@typeof-reject-client: rejected_booked ⊆ NRIC
+	@typeof-available-appt: available_appointment ∈ appointment ⇸ PHARMACIES
+	@typeof-booked-appt-pharmacy: booked_appointment ∈ appointment ⇸ PHARMACIES
+	@typeof-booked-offer: offer ∈ booked ↔ appointment
+	@typeof-accept-booked: accepted_appointment ∈ accepted_booked ↔ booking
+	@typeof-reject-booked: rejected_appointment ∈ rejected_booked ↔ appointment
 
 event INITIALISATION extends INITIALISATION
 then
-	@act11: appointment ≔ ∅
-	@act12: phars ≔ ∅
-	@act13: prescriptions ≔ ∅
-	@act14: offer ≔ ∅ 
-	@act15: booked ≔ ∅ 
-	@act16: booking ≔ ∅
-	@act17: accepted_booked ≔ ∅ 
-	@act18: pres ≔ ∅
-	@act19: available_appointment ≔ ∅
-	@act20: booked_appointment ≔ ∅
-	@act21: accepted_appointment ≔ ∅
-	@act22: rejected_appointment ≔ ∅
-	
-	//--------------------------------
-//	@act18: client_ic ≔ ∅
-	
+	@init-appointment: appointment ≔ ∅
+	@init-pharmacy: phars ≔ ∅
+	@init-offer: offer ≔ ∅ 
+	@init-client-booked: booked ≔ ∅ 
+	@init-booked-appt: booking ≔ ∅
+	@init-accept-client: accepted_booked ≔ ∅ 
+	@init-reject-client: rejected_booked ≔ ∅ 
+	@init-available-appt: available_appointment ≔ ∅
+	@init-booked-appt-pharmacy: booked_appointment ≔ ∅
+	@init-accept-booked: accepted_appointment ≔ ∅
+	@init-reject-booked: rejected_appointment ≔ ∅
 end
 
-//event addDateToAppointment  // relate a date to every pharmacy appointment
-//any
-//	apt_num
-//	appointment
-//	available_appointment_date //date
-//	pharmacy //pharmacy name
-//	get_date
-//where
-//	@grd1: apt_num ∈ ℕ1
-//	@grd2: appointment ∈ dom(appointment_date)
-//	@grd3: available_appointment_date ∈ ran(appointment_date)
-//	@grd4: pharmacy ∈ ran(pharmacies)
-//	@grd5: {(available_appointment_date ↦ appointment_num)} ↦ pharmacy ∉ pharmacy_appointment_list
-//	@grd6: get_date ∈ dom(pharmacy_appointment_list)
-//	@grd7: available_appointment_date ∉ dom(pharmacy_apppointment_num)
-//then
-//	@act1: appointment_num(pharmacy) ≔ apt_num
-//	@act1: pharmacy_appointment_list ≔ pharmacy_appointment_list ∪ {{(appointment_date ↦ appointment_num)} ↦ pharmacy}
-//end
-
-
-//
-//event CreateDate
-//any
-//	dt
-//where
-//	@grd1: dt ∉ date
-//	@grd2: card(pharmacies) ≥ 1
-//then
-//	@act1: date ≔ date ∪ {dt}
-//end
-	
+//-----------------------------------------------------------------
 
 event BookAppointment
 any 
 	ic
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∉ booked
-	@grd4: ic ∈ ran(nric)
-//	@grd2: ic ∈ ran(nric)
-//	@grd3: prescription = no_prescription
-//	@grd4: date = no_date
+	@is-Client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@is-not-booked: ic ∉ booked
+	@has-no-accept-booked: ic ∉ accepted_booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
 then
-	@act1: booked ≔ booked ∪ {ic}
+	@book-appt: booked ≔ booked ∪ {ic}
 end
-
-event CreateNewPrescription
-any 
-	p
-	ic
-where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd7: p ∉ pres
-	@grd9: ic ∉ ran(prescriptions)
-//	@grd8: p ↦ ic ∉ prescriptions	
-then 
-	@act2: pres ≔ pres ∪ {p}
-	@act1: prescriptions ≔ prescriptions ∪ {p ↦ ic}
-end
-
-event CreateUpdatedPrescription
-any 
-	p
-	ic
-	updated_p
-where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd5: updated_p ∉ pres
-	@grd6: updated_p ≠ p
-	@grd7: p ∈ pres
-	@grd8: p ↦ ic ∈ prescriptions	
-then 
-	@act2: pres ≔ (pres ∖ {p}) ∪ {updated_p}
-	@act1: prescriptions ≔ (prescriptions ∖ {p ↦ ic}) ∪ {updated_p ↦ ic }
-end
-
-//event OfferAppointment
-//any p ic d
-//where
-//	@grd1: role(current_user) ∈ {Admin, Staff}
-//	@grd2: current_user ≠ no_user
-//	@grd3: p ∈ pres
-//	@grd4: ic ∈ booked
-//	@grd5: ic ↦ p ∈ prescriptions
-//	@grd6: d ∉ appointment
-//	@grd7: ic ↦ d ∉ offer
-//then
-//	@act1: offer ≔ offer ∪ {ic ↦ d}	
-//end
-
 
 event CreateAvailableAppointment
 any d ph apt_created apt_num 
 where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-//	@grd3: ph ∈ ran({current_user} ◁ pharmacies)
-	@grd3:ph ∈ ran (pharmacies)
-	@grd4: d ∉ appointment
-//	@grd5: d ∉ booking
-	@grd6: d ↦ ph ∉ available_appointment
-	@grd7: apt_created = card(available_appointment ▷ {ph})
-	@grd8: apt_num = appointment_num(ph)
-	@grd9: apt_created ≤ apt_num − 1
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@is-not-null: current_user ≠ no_user
+	@does-pharmacy-exist: ph ∈ ran (pharmacies)
+	@does-day-have-appt: d ∉ appointment
+	@check-pharmacy-have-available-appt: d ↦ ph ∉ available_appointment
+	@check-appt-count: apt_created = card(available_appointment ▷ {ph})
+	@check-pharmacy-apt-num: apt_num = appointment_num(ph)
+	@is-apt-create-num-valid: apt_created ≤ apt_num − 1
 then
-	@act1:appointment ≔ appointment ∪ {d}
-	@act2:available_appointment ≔ available_appointment ∪ {d ↦ ph}
+	@add-appt:appointment ≔ appointment ∪ {d}
+	@add-available-appt-to-pharmacy:available_appointment ≔ available_appointment ∪ {d ↦ ph}
 end
 
-//-----------------------------------------------------------------
 event OfferAppointment
 any p ic d ph 
 where
-	@grd1: role(current_user) ∈ {Admin, Staff}
-	@grd2: current_user ≠ no_user
-	@grd3: p ∈ pres
-	@grd4: ic ∈ booked
-	@grd5: ic ∈ ran(nric)
-	@grd11: d ∉ ran(rejected_appointment) 
-	@grd6: p ↦ ic ∈ prescriptions
-	@grd7: d ∈ appointment
-	@grd8: ph ∈ ran (pharmacies)
-//	@grd7: of_d ∉ appointment
-	@grd9: ic ↦ d ∉ offer
-	@grd10: d ↦ ph ∈ available_appointment
+	@is-admin-or-staff: role(current_user) ∈ {Admin, Staff}
+	@is-not-null: current_user ≠ no_user
+	@does-prescription-exist: p ∈ ran(prescriptions)
+	@did-client-book-appt: ic ∈ booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@is-day-rejected-appt: d ∉ ran(rejected_appointment) 
+	@is-client-correct-prescription: ic ↦ p ∈ prescriptions
+	@is-day-appt: d ∈ appointment
+	@does-pharmacy-exist: ph ∈ ran (pharmacies)
+	@check-user-offer: ic ↦ d ∉ offer
+	@is-d-in-pharmacy-available-appt: d ↦ ph ∈ available_appointment
 then
-	@act1: offer ≔ offer ∪ {ic ↦ d}	
+	@offer-client-appt: offer ≔ offer ∪ {ic ↦ d}	
 end
 
 event getOfferedAppointment
 any result ic p d ph
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd5: p ∈ pres
-	@grd6: d ∈ booking
-	@grd7: ph ∈ ran (pharmacies)
-	@grd8: ic ↦ d ∈ offer
-	@grd9: ic ↦ d ∉ accepted_appointment
-	@grd10: d ↦ ph ∈ available_appointment 
-	@grd11: result = ({ic} ◁ offer)
+	@is-user-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@did-client-book: ic ∈ booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-prescription-exist: p ∈ dom(prescriptions)
+	@is-appt-in-booking: d ∈ booking
+	@does-pharmacy-exist: ph ∈ ran (pharmacies)
+	@check-client-offer: ic ↦ d ∈ offer
+	@check-client-accept-appt: ic ↦ d ∉ accepted_appointment
+	@is-d-in-pharmacy-available-appt: d ↦ ph ∈ available_appointment 
+	@get-offer: result = ({ic} ◁ offer)
 end
 
 event AcceptAppointment
 any 
 	ic d ph
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd5: d ∈ ran({ic} ◁ offer)
-	@grd6: ph ∈ ran({d} ◁ available_appointment)
-//	@grd5: d ∈ ran(offer)
-//	@grd6: d ∉ booking
-//	@grd7: ph ∈ ran(pharmacies)
-//	@grd8: ic ↦ d ∈ offer
-//	@grd9: d ↦ ph ∈ available_appointment 
-//	@grd10: ic ↦ d ∉ accepted_appointment
-	
+	@is-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@did-client-book: ic ∈ booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
+	@does-appt-in-pharmacy-exist: ph ∈ ran({d} ◁ available_appointment)	
 then
-	@act1: booking ≔ booking ∪ {d}
-	@act2: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
-	@act3: offer ≔ offer ∖ {ic ↦ d}
-	@act4: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
-	@act5: available_appointment ≔ available_appointment ∖ {d ↦ ph}
-	@act6: accepted_booked ≔ accepted_booked ∪ {ic}
-	@act7: booked ≔ booked ∖ {ic}
-	@act8: rejected_appointment ≔ {ic} ⩤ rejected_appointment
-	
+	@remove-client-from-pending: booked ≔ booked ∖ {ic}
+	@add-client-to-accepted: accepted_booked ≔ accepted_booked ∪ {ic}
+	@add-appt-to-booking-list: booking ≔ booking ∪ {d}
+	@add-appt-to-accept: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
+	@remove-apt-as-offer: offer ≔ offer ∖ {ic ↦ d}
+	@add-apt-to-pharmacy-booked: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
+	@remove-apt-from-pharmacy: available_appointment ≔ available_appointment ∖ {d ↦ ph}	
 end
 
 event RejectAppointment
 any ic d
 where
-	@grd1: role(current_user) = Client
-	@grd2: current_user ≠ no_user
-	@grd3: ic ∈ booked
-	@grd4: ic ∈ ran(nric)
-	@grd5: d ∈ appointment
-	@grd6: d ∉ booking
-	@grd7: ic ↦ d ∈ offer
-	@grd8: ic ↦ d ∉ accepted_appointment
-	@grd9: ic ↦ d ∉ rejected_appointment
+	@is-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@did-client-book: ic ∈ booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-appt-exist: d ∈ appointment
+	@is-appt-in-booking: d ∉ booking
+	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
+	@check-client-offer: ic ↦ d ∈ offer
+	@is-appt-accepted: ic ↦ d ∉ accepted_appointment
+	@is-appt-rejected: ic ↦ d ∉ rejected_appointment
 	
 then
-//	@act1: booking ≔ booking ∪ {d}
-	@act2: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
-	@act3: offer ≔ offer ∖ {ic ↦ d}
-
-//	@act4: booked ≔ booked ∖ {ic}
-	
+	@remove-client-from-booked: booked ≔ booked ∖ {ic}
+	@add-client-to-reject: rejected_booked ≔ rejected_booked ∪ {ic}
+	@add-apt-to-reject: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+	@remove-client-offer: offer ≔ offer ∖ {ic ↦ d}
 end
 
-//event RebookAppointment
-//any ic d ph
-//where
-//	@grd1: role(current_user) = Client
-//	@grd2: current_user ≠ no_user
-//	
-////	@grd3: ic ∈ booked 
-////	@grd4: d ∈ booking
-////	@grd5: ph ∈ ran(pharmacies)
-////	@grd6: d ↦ ph ∉ available_appointment 
-////	@grd7: d ↦ ph ∈ booked_appointment
-////	@grd8: ic ↦ d ∉ offer
-////	@grd9: ic ↦ d ∈ accepted_appointment
-////	@grd10: ic ↦ d ∉ rejected_appointment
-////	@grd11: d = accepted_appointment(ic)
-////	@grd12: ph = available_appointment(d)
-//then
-////	@act1: booked ≔ booked ∪ {ic}
-////	@act2: available_appointment ≔ available_appointment ∪ {d ↦ ph}
-//	
-////	@act1: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
-////	@act2: offer ≔ offer ∖ {ic ↦ d}
-////	@act3: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
-////	@act4: available_appointment ≔ available_appointment ∖ {d ↦ ph}
-//end	
+event ViewAppointment
+any result ic d ph
+where
+	@is-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@check-client-accepted: ic ∈ accepted_booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-appt-exist-in-booking: d ∈ booking
+	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
+	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
+	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
+	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
+	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
+	@get-appt: result = ({ic} ◁ accepted_appointment)
+end
 
-//-----------------------------------------------------------------
-//event OfferAppointment
-//any
-//	apt
-//	pmc
-//	ic
-//where
-//	@grd1: role(current_user) ≠ Client
-//	@grd2: ic ∈ ran(booked)
-//	@grd3: apt ∈ appointment 
-//	@grd4: pmc ∈ phars
-//	@grd5: dt ∈ date
-//	@grd6: apt_created_num = card(available_appointment ▷ {pmc})
-//	@grd7: apt_num = card({pmc} ◁ appointment_num)
-//	@grd8: apt_created_num ≤ apt_num
-//then
-//	@act1: client_appointment ≔ client_appointment ∪ {ic↦ pmc}
-//end
+event RebookAppointment
+any ic d ph
+where
+	@is-client: role(current_user) = Client
+	@is-not-null: current_user ≠ no_user
+	@did-client-accept-appt: ic ∈ accepted_booked
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-appt-exist: d ∈ booking
+	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
+	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
+	@is-apt-offered-to-client: ic ↦ d ∉ offer
+	@check-client-accepted-appt: ic ↦ d ∈ accepted_appointment
+	@is-apt-rejected: ic ↦ d ∉ rejected_appointment
+then
+	@add-appt: appointment ≔ appointment ∪ {d}
+	@remove-appt-booking: booking ≔ booking ∖ {d}
+	@add-appt-booked: booked ≔ booked ∪ {ic}
+	@remove-appt-client-accept: accepted_booked ≔ accepted_booked ∖ {ic}
+	@add-appt-client-reject: rejected_booked  ≔ rejected_booked ∪ {ic}
+	@add-appt-as-reject: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
+	@remove-appt-from-accept: accepted_appointment ≔ accepted_appointment ∖ {ic ↦ d}
+	@add-appt-as-available: available_appointment ≔ available_appointment ∪ {d ↦ ph}
+	@remove-appt-as-booked: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
+end	
 
-
-//event OfferAppointment
-//any 
-//	pharmacy
-//	medicine_name
-//	appointment
-//	date
-//	batch_num
-//	ic
-//	prescription
-//where
-//	@grd1: current_user ≠ no_user  //check logged in
-//	@grd2: ic ∈ ran(nric) //check ic
-//	@grd3: pharmacy ∈ ran(pharmacies)  //check pharmacy
-//	@grd4: medicine_name ∈ ran(medicine)
-//	@grd5: batch_num ∈ ran(medicine_info)
-//	@grd6: appointment ∈ APPOINTMENT
-//	@grd7: prescription = ran({nric(client)} ◁ prescriptions) //check prescription
-//end
-//
-//event AcceptAppointment
-//any 
-//	ic 
-//	pharmacy 
-//	booking 
-//where
-//	@grd1: role(client) = Client
-//	@grd2: ic ∈ ran(nric)   
-//	@grd3: client ∈ USER
-//	@grd4: pharmacy ∈ pharmacies
-//	@grd5: booking ∈ available_booking
-//	@grd6: (pharmacy ↦ booking) ∈ appointment_available
-//	@grd7-accepted_appointment-not-belongs-client: accepted_appointment(ic) ≠ pharmacy
-//then
-//	@act1-appointment-belongs-clients: accepted_appointment(ic) ≔ pharmacy
-//end
-//
-//
-//
-//event RejectAppointment
-//any 
-//	client
-//	ic 
-//	pharmacy 
-//	booking 
-//	rejected_pharmacy 
-//	rejected_booking
-//where
-//	@grd1: role(client) = Client
-//	@grd2: client ∈ USER
-//	@grd4: pharmacy ∈ pharmacies
-//	@grd5: booking ∈ available_booking
-//	@grd6: (pharmacy ↦ booking) ∈ appointment_available
-//	@grd7: accepted_appointment(ic) ≠ pharmacy
-//	@grd8: rejected_booking ∈ dom(apppointment_time)
-//	@grd9: (rejected_appointment ↦ rejected_pharmacy) ∉ appointment_available
-//	@grd10: booking_process(available_booking) = ic
-//end
-
-
-// 	event AbandonAppointment
-//	any
-//	where
-//	then
-//	end
-//	
-//	event AbandonSystem
-//	any
-//	where
-//	then
-//	end
-//
-//	event ViewAppointment
-//	any
-//	where
-//	then
-//	end
-//
-//	event RebookAppointment
-//	any
-//	where
-//	then
-//	end
-
+//-----------------------------------------------------------------------------
 
 event Login extends Login
 end
@@ -430,9 +226,11 @@ event AddPharmacy extends AddPharmacy
 end
 event AddMedicine extends AddMedicine
 end
-//event getPrescription extends getPrescription
-//end
-event updateAptNum extends updateAptNum
+event initPrescription extends initPrescription
 end
-event getClientName extends getClientName
+event getPrescription extends getPrescription
+end
+event UpdateAptNum extends UpdateAptNum
+end
+event GetClientName extends GetClientName
 end
