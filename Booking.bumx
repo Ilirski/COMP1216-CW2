@@ -271,9 +271,9 @@ event AddPharmacy extends AddPharmacy
 end
 event AddMedicine extends AddMedicine
 end
-event initPrescription extends initPrescription
+event InitPrescription extends InitPrescription
 end
-event getPrescription extends getPrescription
+event GetPrescription extends GetPrescription
 end
 event UpdateAptNum extends UpdateAptNum
 end

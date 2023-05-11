@@ -147,21 +147,21 @@ end
 
 /*An Administrator or Staff can initialise a prescription*/
 /*The initialised prescription is added to a Client's list of prescriptions*/
-event InitPrescription
-any 
-	ic
-	batch_num
-	pres
-where
-	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
-	@does-batch-num-exist: batch_num ∈ dom(medicine)
-	@does-nric-exist: ic ∈ ran(nric)
-	@check-user-prescription: ic ∉ dom(prescriptions)
-	@is-prescription-valid: pres ∈ PRESCRIPTIONS
-then 
-	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
-	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
-end
+//event InitPrescription
+//any 
+//	ic
+//	batch_num
+//	pres
+//where
+//	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
+//	@does-batch-num-exist: batch_num ∈ dom(medicine)
+//	@does-nric-exist: ic ∈ ran(nric)
+//	@check-user-prescription: ic ∉ dom(prescriptions)
+//	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+//then 
+//	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+//	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+//end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
 //event getPrescription
@@ -178,13 +178,13 @@ end
 
 
 //---------------------------------------------------------------------------------
-event initPrescription
+event InitPrescription
 any 
 	ic
 	batch_num
 	pres
 where
-	@grd1: role(current_user) ∈ {Admin, Staff}
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
 	@grd2: batch_num ∈ dom(medicine)
 	@grd3: ic ∈ ran(nric)
 	@grd4: ic ∉ dom(prescriptions)
@@ -196,7 +196,7 @@ then
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
-event getPrescription
+event GetPrescription
 any
 	result
 where
