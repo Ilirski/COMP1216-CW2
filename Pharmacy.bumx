@@ -47,10 +47,6 @@ invariants
 	/* Each prescription includes medicine_info (list of medicine) */
 	/* Prescription also includes last received medicine date */
 	@prescription-medicine-info: medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
-//---------------------------------------------------------------------------------------------------------------------------------
-//	@prescription-used-medicine-info: used_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
-//	@inv1: received_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
-//---------------------------------------------------------------------------------------------------------------------------------
 	@prescription-last-medicine-date: last_medicine_date ∈ PRESCRIPTIONS ⇸ DATE
 	
 	/* REQ 14: A pharmacy has a medicine stock specifying the availability of medicines. */
@@ -108,29 +104,6 @@ then
 	@add-medicine-name-to-batch: medicine ≔ medicine ∪ {batch ↦ medicine_name}
 	@add-qty-to-batch: medicine_qty ≔ {batch ↦ qty}
 end
-
-
-//event InitPrescription
-//any 
-//	ic
-//	batch_num
-//	pres
-//where
-//	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
-//	@does-batch-num-exist: batch_num ∈ dom(medicine)
-//	@does-nric-exist: ic ∈ ran(nric)
-//	@check-user-prescription: ic ∉ dom(prescriptions)
-//	@is-prescription-valid: pres ∈ PRESCRIPTIONS
-//then 
-//	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
-//	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
-//end
-
-/* REQ 13:  A client can retrieve their prescriptions from the system. */
-
-/* Any administrator can update information about the pharmacy */
-/* Updates include number of available appointments for pickup of medicine packets per day */
-
 
 //---------------------------------------------------------------------------------
 /*An Administrator or Staff can initialise a prescription*/
@@ -227,53 +200,6 @@ then
 	@update-med-give-away: gave_away_medicine_qty(batch_num)  ≔ med_gave_away
 	@deduct-med-qty: medicine_qty(batch_num) ≔  stock_created − gave_away_medicine_qty(batch_num)
 end
-
-//event appendPrescription
-//any 
-//	ic
-//	batch_num
-//	p
-//where
-//	@grd1: role(current_user) ∈ {Admin, Staff}
-//	@grd2: batch_num ∈ dom(medicine)
-//	@grd3: ic ∈ dom(prescriptions)
-//	@grd4: p = prescriptions(ic)
-//	@grd5: medicine[{batch_num}] ⊈ medicine[{medicine_info(p)}]
-//then  
-//    @act1: medicine_info ≔ medicine_info ∪ {p ↦ (batch_num)}
-//end	
-
-///*receiving medicine */
-//event updatePrescription
-//any 
-//	ic
-//	pres
-//	batch_num
-//	med
-//	stock_created
-//	med_gave_away
-//where 
-//	@grd1: role(current_user) ∈ {Admin, Staff}
-//	@grd3: ic ∈ dom(prescriptions)
-//	@grd4: pres = prescriptions(ic)
-//	@grd5: batch_num ∈ ran({pres} ◁ medicine_info)
-//	@grd6: med ∈ ran({batch_num} ◁ medicine)
-//	@grd7: stock_created = medicine_qty(batch_num)
-//	@grd8: med_gave_away = card(medicine_info ▷ {batch_num})
-//	@grd9: stock_created ≥ med_gave_away
-//then 
-//	@act1: medicine_info ≔ medicine_info ∖ ({pres} ◁ medicine_info)
-//	@act2: received_medicine_info ≔ received_medicine_info ∪ {({pres} ◁ medicine_info)}
-//	@act3: medicine_qty ≔ medicine_qty ∖ {batch_num ↦ stock_created}
-//	@act4: medicine_qty ≔ medicine_qty ∪ {batch_num ↦ (stock_created − med_gave_away)}
-//	@act5: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
-//end
-
-//event UpdateBatchNumberInPrescription
-//any
-//where
-//then
-//end
 
 //---------------------------------------------------------------------------------
 

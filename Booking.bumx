@@ -3,11 +3,13 @@ refines Pharmacy
 sees BookingContext
 
 variables
+	//User variables
 	password
 	registered
 	current_user
 	role
 	
+	//Pharmacy variables
 	pharmacies
 	medicine
 	medicine_qty
@@ -21,6 +23,7 @@ variables
 	received_medicine_info
 	gave_away_medicine_qty
 	
+	//Booking variables
 	appointment
 	phars
 	offer
@@ -261,7 +264,6 @@ event ReceiveFirstQuantityBatchNumberMedicine extends ReceiveFirstQuantityBatchN
 any ic ph d
 where
 	@check-client-accepted: ic ∈ accepted_booked
-//	@check-client-not-booked: ic ∉ dom(offer)
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-appt-exist-in-booking: d ∈ booking
 	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
@@ -313,9 +315,3 @@ event UpdateAptNum extends UpdateAptNum
 end
 event GetClientName extends GetClientName
 end
-
-
-//event appendPrescription extends appendPrescription
-//end
-//event updatePrescription extends updatePrescription
-//end
