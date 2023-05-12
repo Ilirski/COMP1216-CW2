@@ -258,8 +258,7 @@ end
 event ReceiveMedicine
 any ic p d ph batch_num stock_created med_gave_away
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
+	@is-client: current_user ↦ Client ∈ role
 	@grd1: ic ∈ booked
 	@check-client-accepted: ic ∈ accepted_booked
 	@does-ic-exist: ic ∈ ran(nric)
