@@ -38,7 +38,7 @@ invariants
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
 	@typeof-nric: nric ∈ USER ⤔ NRIC
 	@typeof-prescriptions-list: prescriptions ∈ NRIC ⤔ PRESCRIPTIONS
-	@inv1: received_batch_num ∈ PRESCRIPTIONS ↔ BATCH_NUM
+	@typeof-received-batch-num: received_batch_num ∈ PRESCRIPTIONS ↔ BATCH_NUM
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
