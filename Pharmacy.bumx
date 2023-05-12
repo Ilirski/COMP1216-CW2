@@ -19,6 +19,7 @@ variables
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
+	current_day
 	
 invariants
 
@@ -55,6 +56,10 @@ invariants
 	
 	/* REQ 16: A pharmacy has a daily number of appointments. */
 	@typeof-pharmacy-num: appointment_num ∈ PHARMACIES ⇸ ℕ1
+	
+	// Day
+	@typeof-time: current_day ∈ ℤ
+	
 
 event INITIALISATION extends INITIALISATION
 then
@@ -69,6 +74,12 @@ then
 	@act-last-medicine-date: last_medicine_date ≔ ∅ 
 	@act-pharmacy-stock: pharmacy_stock ≔ ∅
 	@act-daily-appointment-num: appointment_num ≔ ∅
+	@act-init-current_day: current_day ≔ 0
+end
+
+event NextDay
+	then
+		@inc-current_day: current_day ≔ current_day + 1
 end
 
 /* Only the admin can register a new pharmacy */
