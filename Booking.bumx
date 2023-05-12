@@ -20,40 +20,26 @@ variables
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
-	
 	current_day
 	
-//	offer
-//	booked
-//	accepted_booked
-//	rejected_booked
-//	accepted_appointment 
-//	rejected_appointment  
-	
-	// Additions
+	offer
 	appointment_date
 	appointment_pharmacy
 	booking_nric
 	appointment
+	appointment_type
 	booking
+	booking_status
 	
 invariants
 	//@typeof-appointment: appointment ⊆ APPOINTMENT
 	@appointment-status: partition(APPOINTMENT, appointment, booking)
+	@typeof-appointment-type: appointment_type ∈ appointment ↔ APPOINTMENT_STATUS
 	@typeof-appointment-date: appointment_date ∈ APPOINTMENT ↔ ℕ1
 	@typeof-appointment-pharmacy: appointment_pharmacy ∈ PHARMACIES ⤖ APPOINTMENT
 	@typeof-appointment-nric: booking_nric ∈ booking → NRIC
-	
-//	@typeof-appointment: appointment ⊆ DATE
-//	@typeof-client-booked: booked ⊆ NRIC
-//	@typeof-booked-appt: booking ⊆ appointment
-//	@typeof-accept-client: accepted_booked ⊆ NRIC 
-//	@typeof-reject-client: rejected_booked ⊆ NRIC
-//	@typeof-available-appt: available_appointment ∈ appointment ⇸ PHARMACIES
-//	@typeof-booked-appt-pharmacy: booked_appointment ∈ appointment ⇸ PHARMACIES
-//	@typeof-booked-offer: offer ∈ booked ↔ appointment
-//	@typeof-accept-booked: accepted_appointment ∈ accepted_booked ↔ booking
-//	@typeof-reject-booked: rejected_appointment ∈ rejected_booked ↔ appointment
+	@typeof-booking-status: booking_status ∈ NRIC → BOOKING_STATUS
+	@typeof-booked-offer: offer ∈ NRIC ↔ appointment
 
 event INITIALISATION extends INITIALISATION
 then	
@@ -62,258 +48,105 @@ then
 	@typeof-appointment-date: appointment_date ≔ ∅
 	@typeof-appointment-pharmacy: appointment_pharmacy ≔ ∅
 	@typeof-appointment-nric: booking_nric ≔ ∅
-
-//	@init-appointment: appointment ≔ ∅
-//	@init-offer: offer ≔ ∅ 
-//	@init-client-booked: booked ≔ ∅ 
-//	@init-booked-appt: booking ≔ ∅
-//	@init-accept-client: accepted_booked ≔ ∅ 
-//	@init-reject-client: rejected_booked ≔ ∅ 
-//	@init-available-appt: available_appointment ≔ ∅
-//	@init-booked-appt-pharmacy: booked_appointment ≔ ∅
-//	@init-accept-booked: accepted_appointment ≔ ∅
-//	@init-reject-booked: rejected_appointment ≔ ∅
+	@typeof-appointment-type: appointment_type ≔ ∅
+	@typeof-booking-status: booking_status ≔ ∅
+	@init-offer: offer ≔ ∅ 
 end
 
 //-----------------------------------------------------------------
 
 /*	REQ16: Staff or Admin can create appointment if pharmacy exists */
 event CreateAvailableAppointment
-any d 
+any 
+d 
 ph 
-//apt_created 
-//apt_num 
 appt
 where
 	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
 	@does-pharmacy-exist: ph ∈ ran(pharmacies)
-	//@does-day-have-appt: d ∉ appointment
-	//@check-pharmacy-have-available-appt: d ↦ ph ∉ available_appointment
-//	@check-appt-count: apt_created = card(available_appointment ▷ {ph})
-//	@is-ph-in-apt-num: ph ∈ dom(appointment_num)
-//	@check-pharmacy-apt-num: apt_num = appointment_num(ph)
-//	@is-apt-create-num-valid: apt_created ≤ apt_num − 1
-	//@appointment-available: appointment_num(ph) ≠ 0
-	//@apt: apt ∈ appointment
+	@appointment-available: card(appointment_pharmacy ▷ {appt}) ≤ appointment_num(ph)
 	@new_appointment_does-not-exist: appt ∈ APPOINTMENT
-	@appointment_does-not-exist: appt ∉ appointment
-	@booking_does-not-exist: appt ∉ booking
-    @new_appointment_date: d ∈ ℕ1 ∧ d ≥ current_day
+	@appointment-does-not-exist: appt ∉ appointment
+	@booking-does-not-exist: appt ∉ booking
+    @new-appointment-date: d ∈ ℕ1 ∧ d ≥ current_day
 then
-	//@add-appt:appointment ≔ appointment ∪ {d}
-	//@add-available-appt-to-pharmacy:available_appointment ≔ available_appointment ∪ {d ↦ ph}
-//	@add_appointment: appointment ≔ appointment ∪ {appt ↦ (appointment_date ↦ d)}
-//	@add-pharmacy: appointment_pharmacy ≔ ran(pharmacies) ∪ {ph ↦ d}
 	@add-appointment: appointment ≔ appointment ∪ {appt}
+	@set-appointmnet-type: appointment_type(appt) ≔ Available
     @set-appointment-date: appointment_date(appt) ≔ d
     @set-appointment-pharmacy: appointment_pharmacy(ph) ≔ appt
-//    @add-pharmacy: appointment_pharmacy ≔ appointment_pharmacy ∪ {ph ↦ appt}
 end
-//
-///*REQ19: Client can book appointment if they have a prescription */
-///*REQ24: The booking is stopped if there are no more available appointments 
-// * within the 7 days from the date of login to the appointment offer.
-// */
-//event BookAppointment
-//any 
-//	ic
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@is-not-null: current_user ≠ no_user
-//	@is-not-booked: ic ∉ booked
-//	@has-no-accept-booked: ic ∉ accepted_booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
-//then
-//	@book-appt: booked ≔ booked ∪ {ic}
-//end
-//
-///*REQ20: Staff or Admin can offer appointment to Client */
-///*If Client is registered and has prescription, pharmacy has appointment, offer is available */
-//event OfferAppointment
-//any p ic d ph 
-//where
-//	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
-//	@does-prescription-exist: p ∈ ran(prescriptions)
-//	@did-client-book-appt: ic ∈ booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@is-day-rejected-appt: d ∉ ran(rejected_appointment) 
-//	@is-client-correct-prescription: ic ↦ p ∈ prescriptions
-//	@is-day-appt: d ∈ appointment
-//	@does-pharmacy-exist: ph ∈ ran (pharmacies)
-//	@check-user-offer: ic ↦ d ∉ offer
-//	@is-d-in-pharmacy-available-appt: d ↦ ph ∈ available_appointment
-//then
-//	@offer-client-appt: offer ≔ offer ∪ {ic ↦ d}	
-//end
-//
-///*REQ20: Client can view offered available appointment */
-///*Client's IC relates to available appointment of any pharmacy */
-//event getOfferedAppointment
-//any result ic p d ph
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-book: ic ∈ booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@does-prescription-exist: p ∈ dom(prescriptions)
-//	@is-appt-in-booking: d ∈ ran(offer)
-//	@does-pharmacy-exist: ph ∈ ran (pharmacies)
-//	@check-client-offer: ic ↦ d ∈ offer
-//	@check-client-accept-appt: ic ↦ d ∉ accepted_appointment
-//	@is-d-in-pharmacy-available-appt: d ↦ ph ∈ available_appointment 
-//	@get-offer: result = ({ic} ◁ offer)
-//end
-//
-///*Client can accept appointment once he/she confirms appointment */
-///*REQ22: A client is offered the earliest available appointment at any pharmacy */
-//event AcceptAppointment
-//any 
-//	ic d ph
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-book: ic ∈ booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
-//	@does-appt-in-pharmacy-exist: ph ∈ ran({d} ◁ available_appointment)	
-//then
-////	@remove-client-from-pending: booked ≔ booked ∖ {ic}
-//	@add-client-to-accepted: accepted_booked ≔ accepted_booked ∪ {ic}
-//	@add-appt-to-booking-list: booking ≔ booking ∪ {d}
-//	@add-appt-to-accept: accepted_appointment ≔ accepted_appointment ∪ {ic ↦ d}
-//	@remove-apt-as-offer: offer ≔ offer ∖ {ic ↦ d}
-//	@add-apt-to-pharmacy-booked: booked_appointment ≔ booked_appointment ∪ {d ↦ ph}
-//	@remove-apt-from-pharmacy: available_appointment ≔ available_appointment ∖ {d ↦ ph}
-//end
-//
-///*REQ21: If the client rejects the current offer, 
-// * the system offers the following earliest appointment, that might be at a different pharmacy.
-// */
-//event RejectAppointment
-//any ic d
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-book: ic ∈ booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@does-appt-exist: d ∈ appointment
-//	@is-appt-in-booking: d ∉ booking
-//	@check-if-appt-was-offered: d ∈ ran({ic} ◁ offer)
-//	@check-client-offer: ic ↦ d ∈ offer
-//	@is-appt-accepted: ic ↦ d ∉ accepted_appointment
-//	@is-appt-rejected: ic ↦ d ∉ rejected_appointment
-//	
-//then
-//	@remove-client-from-booked: booked ≔ booked ∖ {ic}
-//	@add-client-to-reject: rejected_booked ≔ rejected_booked ∪ {ic}
-//	@add-apt-to-reject: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
-//	@remove-client-offer: offer ≔ offer ∖ {ic ↦ d}
-//end
-//
-///*REQ25: A client can view their current booking */
-//event ViewAppointment
-//any result ic d ph
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@check-client-accepted: ic ∈ accepted_booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@does-appt-exist-in-booking: d ∈ booking
-//	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
-//	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
-//	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
-//	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
-//	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
-//	@get-appt: result = ({ic} ◁ accepted_appointment)
-//end
-//
-///*REQ26: Rebooking an appointment can be done up to 1 day before the date of the original one*/
-///*REQ27: Rebooking follows the same rules as booking. */
-///*REQ28: After re-booking is confirmed, the original appointment becomes available */
-//event RebookAppointment
-//any ic d ph
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-accept-appt: ic ∈ accepted_booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@does-appt-exist: d ∈ booking
-//	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
-//	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
-//	@is-apt-offered-to-client: ic ↦ d ∉ offer
-//	@check-client-accepted-appt: ic ↦ d ∈ accepted_appointment
-//	@is-apt-rejected: ic ↦ d ∉ rejected_appointment
-//then
-//	@add-appt: appointment ≔ appointment ∪ {d}
-//	@remove-appt-booking: booking ≔ booking ∖ {d}
-//	@add-appt-booked: booked ≔ booked ∪ {ic}
-//	@remove-appt-client-accept: accepted_booked ≔ accepted_booked ∖ {ic}
-//	@add-appt-client-reject: rejected_booked  ≔ rejected_booked ∪ {ic}
-//	@add-appt-as-reject: rejected_appointment ≔ rejected_appointment ∪ {ic ↦ d}
-//	@remove-appt-from-accept: accepted_appointment ≔ accepted_appointment ∖ {ic ↦ d}
-//	@add-appt-as-available: available_appointment ≔ available_appointment ∪ {d ↦ ph}
-//	@remove-appt-as-booked: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
-//end	
-//
+
+/*REQ19: Client can book appointment if they have a prescription */
+/*REQ24: The booking is stopped if there are no more available appointments 
+ * within the 7 days from the date of login to the appointment offer.
+ */
+event BookAppointment
+where
+	@is-client: current_user ↦ Client ∈ role
+	@did-client-book-appt: booking_status(nric(current_user)) = False
+then
+	@book-appt: booking_status(nric(current_user)) ≔ True
+end
+
+/*REQ20: Staff or Admin can offer appointment to Client */
+/*If Client is registered and has prescription, pharmacy has appointment, offer is available */
+event OfferAppointment
+any p ic appt ph 
+where
+	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
+	@does-prescription-exist: p ∈ ran(prescriptions)
+	@did-client-book-appt: booking_status(ic) = True
+	@does-ic-exist: ic ∈ ran(nric)
+	@is-day-rejected-appt: appointment_type(appt) ≠ Rejected
+	@is-client-correct-prescription: ic ↦ p ∈ prescriptions
+	@is-day-appt: appt ∈ appointment
+	@does-pharmacy-exist: ph ∈ ran(pharmacies)
+	@check-user-offer: ic ↦ appt ∉ offer
+then
+	@offer-client-appt: offer ≔ offer ∪ {ic ↦ appt}	
+end
+
+/*REQ20: Client can view offered available appointment */
+/*Client's IC relates to available appointment of any pharmacy */
+event getOfferedAppointment
+any result ic p d ph
+where
+	@is-client: current_user ↦ Client ∈ role
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-prescription-exist: p ∈ dom(prescriptions)
+	@is-appt-in-booking: d ∈ ran(offer)
+	@does-pharmacy-exist: ph ∈ ran (pharmacies)
+	@check-client-offer: ic ↦ d ∈ offer
+	@get-offer: result = ({ic} ◁ offer)
+end
+
+/*Client can accept appointment once he/she confirms appointment */
+/*REQ22: A client is offered the earliest available appointment at any pharmacy */
+event AcceptAppointment
+any 
+	d
+where
+	@is-client: current_user ↦ Client ∈ role
+	@did-client-book-appt: booking_status(nric(current_user)) = True
+	@check-if-appt-was-offered: d ∈ ran({nric(current_user)} ◁ offer)
+	@check-client-offer: nric(current_user) ↦ d ∈ offer
+then
+	@remove-appointment: appointment ≔ appointment ∖ {offer(nric(current_user))}
+	@add-booking: booking ≔ booking ∪ {offer(nric(current_user))}
+	@remove-offer: offer ≔ offer ∖ {nric(current_user) ↦ offer(nric(current_user))}
+	@add-booking-nric: booking_nric ≔ booking_nric ∪ {offer(nric(current_user)) ↦ nric(current_user)}
+
+end
+
 ///*REQ23: At any point during the booking process, 
 // * the client can abandon the system without completing the booking */
-//event AbandonSystem
-//any ic
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-book: ic ∈ booked	
-//	@did-client-accept-book: ic ∉ accepted_booked 
-//	@did-client-reject-book: ic ∉ rejected_booked
-//	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
-//	@check-client-offers: ic ∉ dom(offer)
-//then
-//	@remove-client-from-booked: booked ≔ booked ∖ {ic}
-//end
-//
-///*REQ23: At any point during the booking process, 
-// * the client can abandon the system without completing the booking */
-//event AbandonAppointment
-//any ic d
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@did-client-book: ic ∈ booked	
-//	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
-//	@check-appt: d ∈ appointment
-//	@is-appt-booked: d ∉ booking
-//	@is-appt-offered-client: d ∈ ran({ic} ◁ offer)
-//	@check-offer: ic ↦ d ∈ offer
-//	@is-appt-accepted: ic ↦ d ∉ accepted_appointment
-//	@is-appt-rejected: ic ↦ d ∉ rejected_appointment
-//then
-//	@remove-client-from-booked: booked ≔ booked ∖ {ic}
-//	@remove-appt-from-offer: offer ≔ offer ∖ {ic ↦ d}
-//end
-//
-//event ReceiveMedicine
-//any ic p d ph batch_num stock_created med_gave_away
-//where
-//	@is-client: current_user ↦ Client ∈ role
-//	@grd1: ic ∈ booked
-//	@check-client-accepted: ic ∈ accepted_booked
-//	@does-ic-exist: ic ∈ ran(nric)
-//	@does-appt-exist-in-booking: d ∈ booking
-//	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
-//	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
-//	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
-//	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
-//	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
-////	@get-appt: result = ({ic} ◁ accepted_appointment)
-//	@grd2: p ∈ ran(prescriptions)
-//	@grd3: batch_num ∉ ran(received_batch_num)
-//	@grd4: batch_num = medicine_info(p)
-//	@grd8: stock_created ∈ ℕ1
-//	@grd9: med_gave_away ∈ ℕ1
-//	@grd5: stock_created = medicine_qty(batch_num)
-//	@grd6: med_gave_away = card(medicine_info ▷ {batch_num})
-//	@grd7: stock_created ≥ med_gave_away
-//then
-//	@act1: booked ≔ booked ∖ {ic}
-//	@act2: received_batch_num ≔ received_batch_num ∪ {p ↦ batch_num}
-//	@act3: medicine_info ≔ medicine_info ∖ {p ↦ batch_num}
-//	@act4: medicine_qty(batch_num) ≔ (stock_created − med_gave_away)
-//end
-//-----------------------------------------------------------------------------
+event AbandonSystem
+where
+	@is-client: current_user ↦ Client ∈ role
+	@did-client-not-book-appt: booking_status(nric(current_user)) = True
+then
+	@remove-client-from-booked: booking_status(nric(current_user)) ≔ False
+end
 
 event Login extends Login
 end
@@ -322,8 +155,14 @@ end
 event ChangeUserPassword extends ChangeUserPassword
 end
 event RegisterClient extends RegisterClient 
+any 
+	new_status
+where 
+	@no-status: new_status ∉ dom(nric)
+then 
+	@add-status-to-user: booking_status(ic) ≔ False
 end
-event RegisterAdminOrStaff extends RegisterAdminOrStaff 
+event RegisterAdminOrStaff extends RegisterAdminOrStaff
 end
 event AddPharmacy extends AddPharmacy
 end

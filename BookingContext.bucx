@@ -2,9 +2,15 @@ context BookingContext
 extends PharmacyContext
 sets
 	APPOINTMENT
-//constants
-//	Appointment
-//	Booking
-//axioms
-//	@appointment-status: partition(APPOINTMENT, {Appointment}, {Booking})
+	BOOKING_STATUS
+	APPOINTMENT_STATUS
+constants
+	True
+	False
+	Available
+	Accepted
+	Rejected
+axioms
+	@booking-status: partition(BOOKING_STATUS, {True}, {False})
+	@appointment-status: partition(APPOINTMENT_STATUS, {Available}, {Accepted}, {Rejected})
 end
