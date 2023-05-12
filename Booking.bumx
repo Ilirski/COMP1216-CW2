@@ -227,14 +227,13 @@ event AbandonSystem
 any ic
 where
 	@is-client: current_user ↦ Client ∈ role
-	@grd3: ic ∈ booked	
-	@grd4: ic ∉ accepted_booked 
-	@grd5: ic ∉ rejected_booked
-//	@grd4: ic ∈ ran(nric)
-	@grd6: ic ∈ ran({current_user} ◁ nric)
-	@grd7: ic ∉ dom(offer)
+	@did-client-book: ic ∈ booked	
+	@did-client-accept-book: ic ∉ accepted_booked 
+	@did-client-reject-book: ic ∉ rejected_booked
+	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
+	@check-client-offers: ic ∉ dom(offer)
 then
-	@act1: booked ≔ booked ∖ {ic}
+	@remove-client-from-booked: booked ≔ booked ∖ {ic}
 end
 
 /*REQ23: At any point during the booking process, 
@@ -243,17 +242,17 @@ event AbandonAppointment
 any ic d
 where
 	@is-client: current_user ↦ Client ∈ role
-	@grd3: ic ∈ booked	
-	@grd5: ic ∈ ran({current_user} ◁ nric)
-	@grd6: d ∈ appointment
-	@grd7: d ∉ booking
-	@grd8: d ∈ ran({ic} ◁ offer)
-	@grd9: ic ↦ d ∈ offer
-	@grd10: ic ↦ d ∉ accepted_appointment
-	@grd11: ic ↦ d ∉ rejected_appointment
+	@did-client-book: ic ∈ booked	
+	@is-curr-user-ic: ic ∈ ran({current_user} ◁ nric)
+	@check-appt: d ∈ appointment
+	@is-appt-booked: d ∉ booking
+	@is-appt-offered-client: d ∈ ran({ic} ◁ offer)
+	@check-offer: ic ↦ d ∈ offer
+	@is-appt-accepted: ic ↦ d ∉ accepted_appointment
+	@is-appt-rejected: ic ↦ d ∉ rejected_appointment
 then
-	@act1: booked ≔ booked ∖ {ic}
-	@act4: offer ≔ offer ∖ {ic ↦ d}
+	@remove-client-from-booked: booked ≔ booked ∖ {ic}
+	@remove-appt-from-offer: offer ≔ offer ∖ {ic ↦ d}
 end
 
 event ReceiveMedicine
