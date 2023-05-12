@@ -15,11 +15,11 @@ variables
 	nric
 	prescriptions
 	medicine_info
-//	received_medicine_info
-	received_batch_num
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
+	received_medicine_info
+	gave_away_medicine_qty
 	
 	appointment
 	phars
@@ -192,6 +192,7 @@ where
 	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
 	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
 	@get-appt: result = ({ic} ◁ accepted_appointment)
+	@is-client-booked: ic ∈ booked
 end
 
 /*REQ26: Rebooking an appointment can be done up to 1 day before the date of the original one*/
@@ -209,6 +210,7 @@ where
 	@is-apt-offered-to-client: ic ↦ d ∉ offer
 	@check-client-accepted-appt: ic ↦ d ∈ accepted_appointment
 	@is-apt-rejected: ic ↦ d ∉ rejected_appointment
+	@is-client-booked: ic ∈ booked
 then
 	@add-appt: appointment ≔ appointment ∪ {d}
 	@remove-appt-booking: booking ≔ booking ∖ {d}
@@ -255,34 +257,37 @@ then
 	@remove-appt-from-offer: offer ≔ offer ∖ {ic ↦ d}
 end
 
-event ReceiveMedicine
-any ic p d ph batch_num stock_created med_gave_away
+event ReceiveFirstQuantityBatchNumberMedicine extends ReceiveFirstQuantityBatchNumberMedicine
+any ic ph d
 where
-	@is-client: role(current_user) = Client
-	@is-not-null: current_user ≠ no_user
-	@grd1: ic ∈ booked
 	@check-client-accepted: ic ∈ accepted_booked
+//	@check-client-not-booked: ic ∉ dom(offer)
 	@does-ic-exist: ic ∈ ran(nric)
 	@does-appt-exist-in-booking: d ∈ booking
 	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
 	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
 	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
 	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
-	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment 
-//	@get-appt: result = ({ic} ◁ accepted_appointment)
-	@grd2: p ∈ ran(prescriptions)
-	@grd3: batch_num ∉ ran(received_batch_num)
-	@grd4: batch_num = medicine_info(p)
-	@grd8: stock_created ∈ ℕ1
-	@grd9: med_gave_away ∈ ℕ1
-	@grd5: stock_created = medicine_qty(batch_num)
-	@grd6: med_gave_away = card(medicine_info ▷ {batch_num})
-	@grd7: stock_created ≥ med_gave_away
+	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment
 then
-	@act1: booked ≔ booked ∖ {ic}
-	@act2: received_batch_num ≔ received_batch_num ∪ {p ↦ batch_num}
-	@act3: medicine_info ≔ medicine_info ∖ {p ↦ batch_num}
-	@act4: medicine_qty(batch_num) ≔ (stock_created − med_gave_away)
+	@act5: booked ≔ booked ∖ {ic}
+end
+
+event ReceiveMedicine extends ReceiveMedicine
+any ic ph d
+where
+	@check-client-accepted: ic ∈ accepted_booked
+	@check-client-not-booked: ic ∉ booked
+	
+	@does-ic-exist: ic ∈ ran(nric)
+	@does-appt-exist-in-booking: d ∈ booking
+	@is-appt-accepted: d ∈ ran({ic} ◁ accepted_appointment)
+	@check-pharmacy-available-appt: ph ∉ ran({d} ◁ available_appointment)
+	@does-appt-belong-to-pharmacy: ph ∈ ran({d} ◁ booked_appointment)
+	@did-client-accept-appt: ic ↦ d ∈ accepted_appointment
+	@is-appt-in-available-appt: d ↦ ph ∉ available_appointment
+then
+	@act5: booked ≔ booked ∖ {ic}
 end
 //-----------------------------------------------------------------------------
 
@@ -308,6 +313,8 @@ event UpdateAptNum extends UpdateAptNum
 end
 event GetClientName extends GetClientName
 end
+
+
 //event appendPrescription extends appendPrescription
 //end
 //event updatePrescription extends updatePrescription

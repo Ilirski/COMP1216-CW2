@@ -15,10 +15,11 @@ variables
 	nric
 	prescriptions
 	medicine_info
-	received_batch_num
 	last_medicine_date
 	pharmacy_stock
 	appointment_num
+	received_medicine_info
+	gave_away_medicine_qty
 	
 invariants
 
@@ -33,12 +34,14 @@ invariants
 	 /* Each batch of medicine will has its own quantity of stock */
 	 /* The stock only can be one integer number [0, ∞) */
 	@typeof-medicine-qty: medicine_qty ∈ BATCH_NUM ⇸ ℕ
+	@typeof-received-med-info: received_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
+	@type-of-gave-away-med-qty: gave_away_medicine_qty ∈ BATCH_NUM ⇸ ℕ
 	
 	 /* REQ 11: Each client has a name, NRIC and list of prescription*/
 	@typeof-client-name: client_name ∈ NRIC ⇸ USER_NAME
 	@typeof-nric: nric ∈ USER ⤔ NRIC
 	@typeof-prescriptions-list: prescriptions ∈ NRIC ⤔ PRESCRIPTIONS
-	@typeof-received-batch-num: received_batch_num ∈ PRESCRIPTIONS ↔ BATCH_NUM
+	@typeof-received-batch-num: received_medicine_info ∈ PRESCRIPTIONS ↔ BATCH_NUM
 	
 	/* REQ 12: */ 
 	/* Each prescription includes medicine_info (list of medicine) */
@@ -65,10 +68,11 @@ then
 	@act-init-nric: nric ≔ ∅
 	@act-prescriptions: prescriptions ≔ ∅
 	@act-medicine-info: medicine_info ≔ ∅
-	@act-received-medicine-info: received_batch_num ≔ ∅
 	@act-last-medicine-date: last_medicine_date ≔ ∅ 
 	@act-pharmacy-stock: pharmacy_stock ≔ ∅
 	@act-daily-appointment-num: appointment_num ≔ ∅
+	@act-received-medicine-info: received_medicine_info ≔ ∅
+	@act-gave-away-med-qty: gave_away_medicine_qty ≔ ∅
 end
 
 /* Only the admin can register a new pharmacy */
@@ -182,6 +186,46 @@ where
 	@is-apt-num-positive-integer: apt_num ∈ ℕ1
 then
 	@add-apt-num: appointment_num(pharmacy) ≔ apt_num 
+end
+
+event ReceiveFirstQuantityBatchNumberMedicine
+any  p batch_num stock_created med_gave_away
+where
+	@is-client: current_user ↦ Client ∈ role
+	@does-prescription-exists: p ∈ ran(prescriptions)
+	@does-batch-exist: batch_num ∉ ran(received_medicine_info)
+	@get-prescription-batch-num: batch_num = medicine_info(p)
+	@is-stock-integer: stock_created ∈ ℕ
+	@is-med-gave-away-integer: med_gave_away ∈ ℕ
+	@does-batch-num-exist: batch_num ∉ dom(gave_away_medicine_qty)
+	@get-stock-created-qty: stock_created = medicine_qty(batch_num)
+	@get-med-gave-away-qty: med_gave_away = card(medicine_info ▷ {batch_num})
+	@is-stock-enough: stock_created ≥ med_gave_away
+then
+	@add-medicine-gave-away-num: gave_away_medicine_qty ≔ gave_away_medicine_qty ∪ {batch_num ↦ 1}
+	@add-med-info: received_medicine_info≔ received_medicine_info ∪ {p ↦ batch_num}
+	@remove-batch-num: medicine_info ≔ medicine_info ∖ {p ↦ batch_num}
+	@update-stock: medicine_qty(batch_num) ≔  stock_created − 1
+end
+
+event ReceiveMedicine
+any p batch_num stock_created med_gave_away
+where
+	@is-client: current_user ↦ Client ∈ role
+	@does-prescription-exists: p ∈ ran(prescriptions)
+	@does-batch-exist: batch_num ∉ ran(received_medicine_info)
+	@get-batch-num: batch_num = medicine_info(p)
+	@is-stock-integer: stock_created ∈ ℕ
+	@is-med-gave-away-integer: med_gave_away ∈ ℕ
+	@does-batch-num-exist: batch_num ∈ dom(gave_away_medicine_qty)
+	@get-stock-created-qty: stock_created = medicine_qty(batch_num)
+	@get-med-gave-away-qty: med_gave_away = card(medicine_info ▷ {batch_num})
+	@is-stock-enough: stock_created ≥ med_gave_away
+then
+	@add-batch-num: received_medicine_info ≔ received_medicine_info ∪ {p ↦ batch_num}
+	@remove-batch-num: medicine_info ≔ medicine_info ∖ {p ↦ batch_num}
+	@update-med-give-away: gave_away_medicine_qty(batch_num)  ≔ med_gave_away
+	@deduct-med-qty: medicine_qty(batch_num) ≔  stock_created − gave_away_medicine_qty(batch_num)
 end
 
 //event appendPrescription
