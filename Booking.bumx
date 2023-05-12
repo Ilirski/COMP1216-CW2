@@ -81,7 +81,9 @@ then
 end
 
 /*REQ19: Client can book appointment if they have a prescription */
-/*REQ24: The booking is stopped if there are no more available appointments within the 7 days from the date of login to the appointment offer. */
+/*REQ24: The booking is stopped if there are no more available appointments 
+ * within the 7 days from the date of login to the appointment offer.
+ */
 event BookAppointment
 any 
 	ic
@@ -153,7 +155,9 @@ then
 	@remove-apt-from-pharmacy: available_appointment ≔ available_appointment ∖ {d ↦ ph}
 end
 
-/*REQ21: If the client rejects the current offer, the system offers the following earliest appointment, that might be at a different pharmacy. */
+/*REQ21: If the client rejects the current offer, 
+ * the system offers the following earliest appointment, that might be at a different pharmacy.
+ */
 event RejectAppointment
 any ic d
 where
@@ -217,7 +221,8 @@ then
 	@remove-appt-as-booked: booked_appointment ≔ booked_appointment ∖ {d ↦ ph}
 end	
 
-/*REQ23: At any point during the booking process, the client can abandon the system without completing the booking */
+/*REQ23: At any point during the booking process, 
+ * the client can abandon the system without completing the booking */
 event AbandonSystem
 any ic
 where
@@ -232,7 +237,8 @@ then
 	@act1: booked ≔ booked ∖ {ic}
 end
 
-/*REQ23: At any point during the booking process, the client can abandon the system without completing the booking */
+/*REQ23: At any point during the booking process, 
+ * the client can abandon the system without completing the booking */
 event AbandonAppointment
 any ic d
 where
