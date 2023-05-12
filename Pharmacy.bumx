@@ -105,8 +105,7 @@ then
 	@add-qty-to-batch: medicine_qty ≔ {batch ↦ qty}
 end
 
-/*An Administrator or Staff can initialise a prescription*/
-/*The initialised prescription is added to a Client's list of prescriptions*/
+
 //event InitPrescription
 //any 
 //	ic
@@ -130,6 +129,8 @@ end
 
 
 //---------------------------------------------------------------------------------
+/*An Administrator or Staff can initialise a prescription*/
+/*The initialised prescription is added to a Client's list of prescriptions*/ 
 event InitPrescription
 any 
 	ic
@@ -137,14 +138,14 @@ any
 	pres
 where
 	@is-admin-or-staff: current_user ↦ Staff ∈ role ∨ current_user ↦ Admin ∈ role
-	@grd2: batch_num ∈ dom(medicine)
-	@grd3: ic ∈ ran(nric)
-	@grd4: ic ∉ dom(prescriptions)
-	@grd5: pres ∈ PRESCRIPTIONS
-	@grd: pres ∉ ran(prescriptions)
+	@does-batch-num-exist: batch_num ∈ dom(medicine)
+	@does-nric-exist: ic ∈ ran(nric)
+	@check-user-prescription: ic ∉ dom(prescriptions)
+	@is-prescription-valid: pres ∈ PRESCRIPTIONS
+	@does-prescription-exist: pres ∉ ran(prescriptions)
 then 
-	@act1:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
-	@act2: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
+	@add-prescription:  prescriptions ≔ prescriptions ∪ {ic ↦ pres}
+	@add-medicine-info: medicine_info ≔ medicine_info ∪ {pres ↦ batch_num}
 end
 
 /* REQ 13:  A client can retrieve their prescriptions from the system. */
